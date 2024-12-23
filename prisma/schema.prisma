@@ -1,0 +1,94 @@
+datasource db {
+  provider = "postgresql" // Use your preferred database provider
+  url      = env("DATABASE_URL") // Ensure to set your database URL in .env
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  UserId              Int             @id @default(autoincrement())
+  UserName            String
+  Name                String?
+  Phone               Int?
+  Email               String?
+  CollegeName         String?
+  AcceptanceRate      Float
+  RecentActivity      RecentActivity? @relation
+  ProblemDistribution Problem[]
+  TopicDistributions  Tag[]
+  LeaderBoardEntry    LeaderBoard?    @relation
+  CreatedAt           DateTime        @default(now())
+  UpdatedAt           DateTime        @updatedAt
+}
+
+model Problem {
+  ProblemId          Int    @id @default(autoincrement())
+  ProblemName        String
+  ProblemDescription String
+
+  SampleCases SCases[]
+  TestCases   Case[]
+  Difficulty  String
+  Tried       Int
+  Submitted   Int
+
+  Hints       String[]
+  Topics      Tag[]    @relation
+  TimeLimit   Int
+  MemoryLimit Int
+  User        User?    @relation(fields: [userUserId], references: [UserId])
+  userUserId  Int?
+}
+
+model SCases {
+  caseId    Int     @default(autoincrement())
+  problemId Int     @unique
+  Problem   Problem @relation(fields: [problemId], references: [ProblemId])
+}
+
+model RecentActivity {
+  ActivityId      Int   @id @default(autoincrement())
+  UserId          Int   @unique
+  User            User  @relation(fields: [UserId], references: [UserId])
+  SubmissionCount Int
+  TriedCount      Int
+  SubmittedCount  Int
+  SuccessRate     Float
+  Streak          Int
+
+  ProblemTags    String[]
+  LastSubmission DateTime
+  ActivityType   String
+  CreatedAt      DateTime @default(now())
+}
+
+model Case {
+  CaseId          Int     @id @default(autoincrement())
+  ProblemId       Int
+  Problem         Problem @relation(fields: [ProblemId], references: [ProblemId])
+  CaseInput       String
+  CaseOutput      String
+  CaseExplanation String?
+}
+
+model Tag {
+  TagId      Int       @id @default(autoincrement())
+  TagName    String    @unique
+  CreatedAt  DateTime  @default(now())
+  Problems   Problem[] @relation
+  User       User?     @relation(fields: [userUserId], references: [UserId])
+  userUserId Int?
+}
+
+model LeaderBoard {
+  LeaderBoardId       Int      @id @default(autoincrement())
+  UserId              Int      @unique
+  User                User     @relation(fields: [UserId], references: [UserId])
+  Rank                Int
+  TotalProblemsSolved Int
+  SuccessRate         Float
+  Streak              Int
+  UpdatedAt           DateTime @default(now())
+}
