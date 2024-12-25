@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { Code2 } from 'lucide-react'
+import { Code2, LogIn, LogOut, UserPlus } from 'lucide-react'
+import { Button } from "@/components/ui/button";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,6 +25,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body>
@@ -48,8 +50,42 @@ export default function RootLayout({
             <Link className="text-sm font-medium hover:underline underline-offset-4" href="/jobs">
               Jobs
             </Link>
+            {true && (
+              <Link className="text-sm font-medium hover:underline underline-offset-4" href="/dashboard">
+                Dashboard
+              </Link>
+            )}
           </nav>
+          {false ? (
+            <Button 
+              variant="ghost" 
+              className="ml-4" 
+             
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          ) : (
+            <div className="ml-4 flex gap-2">
+              <Button 
+                variant="ghost" 
+              
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Login
+              </Button>
+              <Button 
+                variant="ghost" 
+                
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Register
+              </Button>
+            </div>
+          )}
+       
         </header>
+        
         <main>{children}</main>
         <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
           <p className="text-xs text-gray-500 dark:text-gray-400">
