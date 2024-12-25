@@ -1,3 +1,5 @@
+import RegisterPage from "./Register";
+
 export default function register() {
-    return <h1>Register</h1>
+    return <RegisterPage></RegisterPage>
 }
