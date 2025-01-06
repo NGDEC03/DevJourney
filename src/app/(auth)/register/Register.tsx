@@ -6,31 +6,43 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Textarea } from "@/components/ui/textarea"
+import axios from 'axios'
 
+import { AlertCircle, CircleArrowOutUpLeftIcon, Link2, LinkIcon} from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { TagSelector } from '@/components/TagSelector'
+import toast from 'react-hot-toast'
+import Link from 'next/link'
+import { useToast } from '@/hooks/use-toast'
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [step, setStep] = useState(1)
-  const [topics, setTopics] = useState('')
+  const [name, setName] = useState('')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const router = useRouter()
+  // const {toast}=useToast()
 
   const handleInitialRegister = (e: React.FormEvent) => {
     e.preventDefault()
-    if (email && password) {
-      console.log('Initial registration with:', email, password)
+    if (email && password && name) {
       setStep(2)
     } else {
       setError('Please fill in all fields')
     }
   }
 
-  const handleTopicsSubmit = (e: React.FormEvent) => {
+  const handleTopicsSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Topics submitted:', topics)
+    try{
+const res=await axios.post("/api/register",{Email:email,password,selectedTags,Name:name})
+console.log(res.data);
+
+    }
+    catch(err){
+      console.error(err)
+    }
     router.push('/login')
   }
 
@@ -39,6 +51,7 @@ export default function RegisterPage() {
     router.push('/login')
   }
 
+  
   return (
     <div className="container mx-auto flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
@@ -47,12 +60,22 @@ export default function RegisterPage() {
           <CardDescription>
             {step === 1 
               ? 'Create a new account to get started' 
-              : 'Tell us about your coding interests or skills'}
+              : 'Select or add your coding interests or skills'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {step === 1 ? (
             <form onSubmit={handleInitialRegister} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Enter your Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -81,19 +104,18 @@ export default function RegisterPage() {
                 </Alert>
               )}
               <Button type="submit" className="w-full">Next</Button>
+              
             </form>
+            
           ) : (
             <form onSubmit={handleTopicsSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="topics">
                   What topics are you fluent in or willing to learn?
                 </Label>
-                <Textarea
-                  id="topics"
-                  placeholder="E.g., Python, JavaScript, Machine Learning, Web Development..."
-                  value={topics}
-                  onChange={(e) => setTopics(e.target.value)}
-                  className="min-h-[100px]"
+                <TagSelector
+                  selectedTags={selectedTags}
+                  onTagsChange={setSelectedTags}
                 />
               </div>
               <div className="flex justify-between">
@@ -104,8 +126,20 @@ export default function RegisterPage() {
               </div>
             </form>
           )}
+          <div className="mt-6 text-center text-sm flex justify-center">
+            <span className="text-muted-foreground">
+              Already have an account?{' '}
+            </span>
+       
+           <Link href='/login' className='ml-2'>
+           <CircleArrowOutUpLeftIcon
+         ></CircleArrowOutUpLeftIcon>
+           </Link>
+           
+          </div>
         </CardContent>
       </Card>
+      
     </div>
   )
 }

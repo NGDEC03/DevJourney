@@ -1,94 +1,54 @@
-datasource db {
-  provider = "postgresql" // Use your preferred database provider
-  url      = env("DATABASE_URL") // Ensure to set your database URL in .env
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 model User {
-  UserId              Int             @id @default(autoincrement())
-  UserName            String
-  Name                String?
-  Phone               Int?
-  Email               String?
-  CollegeName         String?
-  AcceptanceRate      Float
-  RecentActivity      RecentActivity? @relation
-  ProblemDistribution Problem[]
-  TopicDistributions  Tag[]
-  LeaderBoardEntry    LeaderBoard?    @relation
-  CreatedAt           DateTime        @default(now())
-  UpdatedAt           DateTime        @updatedAt
+  userName          String    @id @unique
+  Email             String    @unique
+  Name              String?
+  password          String
+  cName             String?
+  problems          Problem[]
+  tags              String[]
+  acceptanceRate    Float?
+  topicDistribution Tag[]
+  createdAt         DateTime  @default(now())
 }
 
 model Problem {
-  ProblemId          Int    @id @default(autoincrement())
-  ProblemName        String
-  ProblemDescription String
-
-  SampleCases SCases[]
-  TestCases   Case[]
-  Difficulty  String
-  Tried       Int
-  Submitted   Int
-
-  Hints       String[]
-  Topics      Tag[]    @relation
-  TimeLimit   Int
-  MemoryLimit Int
-  User        User?    @relation(fields: [userUserId], references: [UserId])
-  userUserId  Int?
-}
-
-model SCases {
-  caseId    Int     @default(autoincrement())
-  problemId Int     @unique
-  Problem   Problem @relation(fields: [problemId], references: [ProblemId])
-}
-
-model RecentActivity {
-  ActivityId      Int   @id @default(autoincrement())
-  UserId          Int   @unique
-  User            User  @relation(fields: [UserId], references: [UserId])
-  SubmissionCount Int
-  TriedCount      Int
-  SubmittedCount  Int
-  SuccessRate     Float
-  Streak          Int
-
-  ProblemTags    String[]
-  LastSubmission DateTime
-  ActivityType   String
-  CreatedAt      DateTime @default(now())
+  problemId   Int    @id @default(autoincrement())
+  problemName String
+  tags        Tag[]
+  userName    String
+  user        User   @relation(fields: [userName], references: [userName])
+  problemD    String
+  tCases      Case[]
+  difficulty  String
+  nTried      Int
+  nSuccess    Int
+  timeLimit   Int
+  memoryLimit Int
 }
 
 model Case {
-  CaseId          Int     @id @default(autoincrement())
-  ProblemId       Int
-  Problem         Problem @relation(fields: [ProblemId], references: [ProblemId])
-  CaseInput       String
-  CaseOutput      String
-  CaseExplanation String?
+  caseId      Int     @id @default(autoincrement())
+  input       String
+  output      String
+  explanation String?
+  problemId   Int
+  problem     Problem @relation(fields: [problemId], references: [problemId])
 }
 
 model Tag {
-  TagId      Int       @id @default(autoincrement())
-  TagName    String    @unique
-  CreatedAt  DateTime  @default(now())
-  Problems   Problem[] @relation
-  User       User?     @relation(fields: [userUserId], references: [UserId])
-  userUserId Int?
-}
-
-model LeaderBoard {
-  LeaderBoardId       Int      @id @default(autoincrement())
-  UserId              Int      @unique
-  User                User     @relation(fields: [UserId], references: [UserId])
-  Rank                Int
-  TotalProblemsSolved Int
-  SuccessRate         Float
-  Streak              Int
-  UpdatedAt           DateTime @default(now())
+  tagId     Int     @id @default(autoincrement())
+  name      String
+  problemId Int
+  problem   Problem @relation(fields: [problemId], references: [problemId])
+  userName  String
+  user      User    @relation(fields: [userName], references: [userName])
 }

@@ -1,19 +1,21 @@
 import {NextResponse,NextRequest} from 'next/server'
-import RegisterUser from '@/utils/registerHandle'
+import {RegisterUser} from './registerHandle'
 async function GET(res:NextResponse){
 
   return NextResponse.json({message:"Succesfull call"})
 }
 
-async function POST(req:NextRequest){
+export async function POST(req:NextRequest){
     const body=await req.json()
-    const {email,password}=body
+    const {Email,password,selectedTags,Name}=body
     try{
-        RegisterUser(email,password)
+      console.log(Name,Email,password,selectedTags);
+      
+       const user=await RegisterUser({Email,password,selectedTags,Name}) 
+        return NextResponse.json(user)
     }
     catch(err){
       return NextResponse.json({message:err})
     }
     
 }
-export default {GET,POST}

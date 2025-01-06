@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle,CircleArrowOutUpLeftIcon,PersonStanding } from 'lucide-react'
+import Link from 'next/link'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function LoginPage() {
@@ -65,6 +66,14 @@ export default function LoginPage() {
             )}
             <Button type="submit" className="w-full">Login</Button>
           </form>
+          <div className="mt-6 text-center text-sm flex justify-center">
+            <span className="text-muted-foreground">
+              Don't have an account?{' '}
+            </span>
+            <Link href='/login' className='ml-2'>
+         <CircleArrowOutUpLeftIcon
+         ></CircleArrowOutUpLeftIcon>
+           </Link>  </div>
         </CardContent>
       </Card>
     </div>
