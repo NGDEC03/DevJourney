@@ -4,7 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { Code2, LogIn, LogOut, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 
@@ -34,6 +34,7 @@ export default function RootLayout({
       
     <Header></Header>
         <main className="flex-1">{children}</main>
+        <Toaster/>
 <Footer></Footer>
        
       </body>

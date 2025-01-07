@@ -11,9 +11,9 @@ import axios from 'axios'
 import { AlertCircle, CircleArrowOutUpLeftIcon, Link2, LinkIcon} from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { TagSelector } from '@/components/TagSelector'
-import toast from 'react-hot-toast'
+
 import Link from 'next/link'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,7 +22,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const router = useRouter()
-  // const {toast}=useToast()
+  const {toast}=useToast()
 
   const handleInitialRegister = (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,8 +41,18 @@ console.log(res.data);
 
     }
     catch(err){
-      console.error(err)
+      toast({
+        title: "⚠️ Registration Failed",
+        description: err as string,
+        variant: "destructive", 
+        duration: 2000, 
+      });
     }
+    toast({
+      title: "🎉 Registration Successful!",
+      description: "You're all set! 🚀 Login to explore your dashboard.", 
+      duration: 2000, 
+    });
     router.push('/login')
   }
 
