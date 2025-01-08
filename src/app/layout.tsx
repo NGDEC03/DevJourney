@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
-import { Code2, LogIn, LogOut, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
+import SessionWrapper from "@/lib/sessionWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,12 +30,14 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen flex flex-col">
       
-    <Header></Header>
-        <main className="flex-1">{children}</main>
-        <Toaster/>
-<Footer></Footer>
-       
-      </body>
+      <Header></Header>
+      <SessionWrapper>
+          <main className="flex-1">{children}</main>
+      </SessionWrapper>
+          <Toaster/>
+  <Footer></Footer>
+         
+        </body>
     </html>
   );
 }

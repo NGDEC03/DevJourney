@@ -25,12 +25,12 @@ model Problem {
   problemName String
   tags        Tag[]
   userName    String
-  user        User   @relation(fields: [userName], references: [userName])
+  user        User?   @relation(fields: [userName], references: [userName])
   problemD    String
   tCases      Case[]
   difficulty  String
-  nTried      Int
-  nSuccess    Int
+  nTried      Int?
+  nSuccess    Int?
   timeLimit   Int
   memoryLimit Int
 }

@@ -8,8 +8,10 @@ import { Progress } from "@/components/ui/progress"
 import { BarChart, Code, Trophy, BookOpen, CheckCircle, Clock, PieChartIcon, XCircle } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useSession } from 'next-auth/react'
 
 export default function DashboardPage() {
+  const {data:session}=useSession()
   const [recentProblems] = useState([
     { id: 1, name: 'Two Sum', difficulty: 'Easy', completed: true },
     { id: 2, name: 'Longest Substring Without Repeating Characters', difficulty: 'Medium', completed: false },
@@ -46,7 +48,7 @@ export default function DashboardPage() {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">247</div>
+            <div className="text-2xl font-bold"></div>
             <p className="text-xs text-muted-foreground">+23 from last week</p>
           </CardContent>
         </Card>

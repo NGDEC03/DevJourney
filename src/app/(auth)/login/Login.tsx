@@ -3,29 +3,38 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertCircle,CircleArrowOutUpLeftIcon,PersonStanding } from 'lucide-react'
 import Link from 'next/link'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string|undefined|null>('')
   const router = useRouter()
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically call an API to authenticate the user
-    // For this example, we'll just simulate a successful login
-    if (username && password) {
-      console.log('Logging in with:', username, password)
-      router.push('/dashboard')
-    } else {
-      setError('Please fill in all fields')
-    }
+  const handleLogin = async (e: React.FormEvent) => {
+    try{
+      e.preventDefault()
+      console.log(username,password);
+      
+      const res=await signIn("Credentials",{
+        username,
+        password,
+      redirect:false
+      })
+      if(!res?.error)router.push("/dashboard")
+}
+catch(err){
+
+}
+
+
   }
 
   return (
@@ -70,7 +79,7 @@ export default function LoginPage() {
             <span className="text-muted-foreground">
               Don't have an account?{' '}
             </span>
-            <Link href='/login' className='ml-2'>
+            <Link href='/register' className='ml-2'>
          <CircleArrowOutUpLeftIcon
          ></CircleArrowOutUpLeftIcon>
            </Link>  </div>

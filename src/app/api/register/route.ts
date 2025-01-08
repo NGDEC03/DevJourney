@@ -12,6 +12,8 @@ export async function POST(req:NextRequest){
       console.log(Name,Email,password,selectedTags);
       
        const user=await RegisterUser({Email,password,selectedTags,Name}) 
+       console.log(user);
+       
         return NextResponse.json(user)
     }
     catch(err){
