@@ -31,6 +31,7 @@ const options: NextAuthOptions = {
             if (user) {
                 token.userName = user.userName
                 token.Name = user.Name
+                token.Email=user.Email
                 token.avatar = user.avatar || "default-avatar"
             }
             return token
@@ -42,6 +43,7 @@ const options: NextAuthOptions = {
                 // session.user.email="ngdec03"
                 session.user.userName = token.userName
                 session.user.name = token.Name
+                session.user.email=token.Email
                 session.user.avatar = token.avatar
             }
             return session

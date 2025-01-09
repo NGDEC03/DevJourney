@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-export async function generateHashedPassword(password: string) {
+export async function generateHashedPassword(password: string):Promise<string> {
     try {
        const saltRounds = 10
        const hashedPassword = await bcrypt.hash(password, saltRounds)
@@ -9,7 +9,7 @@ export async function generateHashedPassword(password: string) {
     }
     catch (err) {
        console.error(err);
- 
+ return JSON.stringify(err)
     }
  }
  

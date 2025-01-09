@@ -8,23 +8,24 @@ datasource db {
 }
 
 model User {
-  userName          String    @id @unique
-  Email             String    @unique
-  Name              String?
-  password          String
-  cName             String?
-  problems          Problem[]
-  tags              String[]
-  acceptanceRate    Float?
-  createdAt         DateTime  @default(now())
+  userName       String    @id @unique
+  Email          String    @unique
+  Name           String?
+  password       String
+  cName          String?
+  problems       Problem[]
+  tags           String[]
+  acceptanceRate Float?
+  createdAt      DateTime  @default(now())
+  avatar         String?
 }
 
 model Problem {
-  problemId   Int    @id @default(autoincrement())
+  problemId   Int      @id @default(autoincrement())
   problemName String
   tags        String[]
   userName    String
-  user        User?   @relation(fields: [userName], references: [userName])
+  user        User?    @relation(fields: [userName], references: [userName])
   problemD    String
   tCases      Case[]
   difficulty  String
@@ -42,4 +43,3 @@ model Case {
   problemId   Int
   problem     Problem @relation(fields: [problemId], references: [problemId])
 }
-
