@@ -41,9 +41,9 @@ export default function ProblemPage({ id }: {id:string} ) {
 
     const [code, setCode] = useState(problemData.starterCode)
 
-    const handleSubmit = () => {
-        console.log("Submitting code:", code)
-        // Here you would typically send the code to your backend for evaluation
+    const handleSubmit = async() => {
+//    
+
     }
 
     return (

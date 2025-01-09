@@ -1,9 +1,12 @@
+"use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useSession } from "next-auth/react"
 import { Code2, GraduationCap, Users, Github } from 'lucide-react'
 
 export default function LandingPage() {
+  const {data:session}=useSession()
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">

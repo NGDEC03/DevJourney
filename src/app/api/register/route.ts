@@ -12,9 +12,9 @@ export async function POST(req:NextRequest){
       console.log(Name,Email,password,selectedTags);
       
        const user=await RegisterUser({Email,password,selectedTags,Name}) 
-       console.log(user);
        
-        return NextResponse.json(user)
+        const response= NextResponse.json(user)
+        return response
     }
     catch(err){
       return NextResponse.json({message:err})

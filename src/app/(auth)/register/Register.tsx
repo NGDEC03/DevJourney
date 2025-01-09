@@ -37,7 +37,7 @@ export default function RegisterPage() {
     e.preventDefault()
     try{
 const res=await axios.post("/api/register",{Email:email,password,selectedTags,Name:name})
-console.log(res.data);
+console.log(res);
 
     }
     catch(err){

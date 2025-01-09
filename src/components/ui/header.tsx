@@ -1,10 +1,18 @@
+"use client"
 import { Code2, LogIn, LogOut, UserPlus } from 'lucide-react'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from './button'
+import { signOut, useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 export default function Header(){
-    const isLoggedIn=false
+  const router=useRouter()
+  const [isLoggedIn,setLoggedIn]=useState(false)
+  const {data:session}=useSession()
+    useEffect(()=>{
+if(session?.user)setLoggedIn(true)
+    },[session?.user])
   return (
 
  <header className="px-4 lg:px-6 h-14 flex items-center">
@@ -35,17 +43,17 @@ export default function Header(){
    )}
  </nav>
  {isLoggedIn ? (
-   <Button variant="ghost" className="ml-4">
+   <Button variant="ghost" className="ml-4" onClick={()=>signOut()}>
      <LogOut className="h-4 w-4 mr-2" />
      Logout
    </Button>
  ) : (
    <div className="ml-4 flex gap-2">
-     <Button variant="ghost">
+     <Button variant="ghost" onClick={()=>router.push("/login")}>
        <LogIn className="h-4 w-4 mr-2" />
        Login
      </Button>
-     <Button variant="ghost">
+     <Button variant="ghost" onClick={()=>router.push("/register")}>
        <UserPlus className="h-4 w-4 mr-2" />
        Register
      </Button>

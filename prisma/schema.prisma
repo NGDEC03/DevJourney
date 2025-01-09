@@ -16,14 +16,13 @@ model User {
   problems          Problem[]
   tags              String[]
   acceptanceRate    Float?
-  topicDistribution Tag[]
   createdAt         DateTime  @default(now())
 }
 
 model Problem {
   problemId   Int    @id @default(autoincrement())
   problemName String
-  tags        Tag[]
+  tags        String[]
   userName    String
   user        User?   @relation(fields: [userName], references: [userName])
   problemD    String
@@ -44,11 +43,3 @@ model Case {
   problem     Problem @relation(fields: [problemId], references: [problemId])
 }
 
-model Tag {
-  tagId     Int     @id @default(autoincrement())
-  name      String
-  problemId Int
-  problem   Problem @relation(fields: [problemId], references: [problemId])
-  userName  String
-  user      User    @relation(fields: [userName], references: [userName])
-}

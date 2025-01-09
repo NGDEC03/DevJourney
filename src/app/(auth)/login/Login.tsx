@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { AlertCircle,CircleArrowOutUpLeftIcon,PersonStanding } from 'lucide-reac
 import Link from 'next/link'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { signIn } from 'next-auth/react'
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -18,24 +19,29 @@ export default function LoginPage() {
   const [error, setError] = useState<string|undefined|null>('')
   const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    try{
-      e.preventDefault()
-      console.log(username,password);
-      
-      const res=await signIn("Credentials",{
+
+    // const router = useRouter(); // Get the router instance
+  
+    const handleLogin = async (event: React.FormEvent) => {
+      event.preventDefault();
+      const form = event.target as HTMLFormElement;
+      const username = form.username.value;
+      const password = form.password.value;
+  
+      const res = await signIn("credentials", {
         username,
         password,
-      redirect:false
-      })
-      if(!res?.error)router.push("/dashboard")
-}
-catch(err){
-
-}
-
-
-  }
+        redirect: false, // Prevent automatic redirect
+        callbackUrl: "/dashboard", // Custom callback URL
+      });
+  
+      if (res?.error) {
+        console.error(res.error); // Handle error if login fails
+      } else {
+        // Redirect to the callbackUrl
+        router.push(res?.url || "/dashboard"); // Redirect to the desired page ("/dashboard")
+      }
+    }
 
   return (
     <div className="container mx-auto flex items-center justify-center min-h-screen">
@@ -88,4 +94,3 @@ catch(err){
     </div>
   )
 }
-

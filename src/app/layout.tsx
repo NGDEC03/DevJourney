@@ -30,8 +30,8 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen flex flex-col">
       
-      <Header></Header>
       <SessionWrapper>
+      <Header></Header>
           <main className="flex-1">{children}</main>
       </SessionWrapper>
           <Toaster/>

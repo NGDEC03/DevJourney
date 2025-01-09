@@ -1,22 +1,44 @@
-import prisma from "@/prismaClient";
+import { prisma } from "@/prismaClient";
+// import { Tag } from "@prisma/client";
 import { NextResponse, NextRequest } from "next/server";
-export async function POST(req: NextRequest) {
 
-    try {
-        const body = await req.json()
-        const { name, difficulty, description, tLimit, mLimit } = body
-        const problem = await prisma.problem.create({
-            data: {
-                problemName: name,
-                difficulty,
-                problemD: description,
-                timeLimit: tLimit,
-                memoryLimit: mLimit
-            }
-        })
-        return NextResponse.json({ problem })
-    }
-    catch (err) {
-        return NextResponse.json({ err })
-    }
+interface ProblemInput {
+  problemName: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  problemD: string;
+  timeLimit: number;
+  memoryLimit: number;
+  tags: string[];
+}
+
+export async function POST(req: NextRequest) {
+  try {
+const problemData=await req.json() as ProblemInput
+
+   
+    const problem = await prisma.problem.create({
+      data: {
+        problemD: problemData.problemD,
+        problemName: problemData.problemName,
+        memoryLimit: problemData.memoryLimit,
+        timeLimit: problemData.timeLimit,
+        difficulty: problemData.difficulty,
+        tags: problemData.tags
+      }
+    });
+
+    return NextResponse.json({ 
+      success: true,
+      data: problem
+    });
+
+  } catch (err) {
+    console.error("Error creating problem:", err);
+    return NextResponse.json({ 
+      success: false,
+      error: err instanceof Error ? err.message : "Internal server error"
+    }, { 
+      status: 500 
+    });
+  }
 }
