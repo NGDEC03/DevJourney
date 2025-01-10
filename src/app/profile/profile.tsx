@@ -201,8 +201,11 @@ export function EditProfile() {
             <Controller
               name="Name"
               control={control}
-              render={({ field }) => <Input {...field} disabled={!isEditing} />}
+              render={({ field }) => (
+                <Input {...field} type="text" value={field.value || ''} disabled={!isEditing} />
+              )}
             />
+
             {errors.Name && <p className="text-red-500 text-sm">{errors.Name.message}</p>}
           </div>
 
@@ -221,7 +224,7 @@ export function EditProfile() {
             <Controller
               name="cName"
               control={control}
-              render={({ field }) => <Input {...field} disabled={!isEditing} />}
+              render={({ field }) => <Input {...field} value={field.value|| ''} disabled={!isEditing} />}
             />
             {errors.cName && <p className="text-red-500 text-sm">{errors.cName.message}</p>}
           </div>

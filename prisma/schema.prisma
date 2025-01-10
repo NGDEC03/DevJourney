@@ -13,26 +13,26 @@ model User {
   Name           String?
   password       String
   cName          String?
-  problems       Problem[]
-  tags           String[]
   acceptanceRate Float?
   createdAt      DateTime  @default(now())
-  avatar         String?
+  tags           String[]
+  problems       Problem[]
+  
 }
 
 model Problem {
-  problemId   Int      @id @default(autoincrement())
+  problemId   Int    @id @default(autoincrement())
   problemName String
-  tags        String[]
   userName    String
-  user        User?    @relation(fields: [userName], references: [userName])
   problemD    String
-  tCases      Case[]
   difficulty  String
-  nTried      Int?
-  nSuccess    Int?
+  nTried      Int @default(0)
+  nSuccess    Int @default(0)
   timeLimit   Int
   memoryLimit Int
+  tCases      Case[]
+  user        User?   @relation(fields: [userName], references: [userName])
+  Tag         String[]
 }
 
 model Case {

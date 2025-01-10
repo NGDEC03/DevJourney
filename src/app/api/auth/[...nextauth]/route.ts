@@ -1,6 +1,13 @@
 import { prisma } from "@/prismaClient";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider  from "next-auth/providers/credentials";
+interface User {
+    id:string
+    userName: string
+    Name: string
+    Email: string
+    avatar?: string
+  }
 
 const options: NextAuthOptions = {
     providers: [
@@ -19,7 +26,7 @@ const options: NextAuthOptions = {
                 return {
                     ...user,
                     id: "21"
-                }
+                } as User
             }
         })
     ],
@@ -27,7 +34,9 @@ const options: NextAuthOptions = {
         signIn: "/login"
     },
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user }:{token:any,user:any}) {
+            console.log(user);
+            
             if (user) {
                 token.userName = user.userName
                 token.Name = user.Name
@@ -42,10 +51,12 @@ const options: NextAuthOptions = {
             if (session.user) {
                 // session.user.email="ngdec03"
                 session.user.userName = token.userName
-                session.user.name = token.Name
-                session.user.email=token.Email
+                session.user.Name = token.Name
+                session.user.Email=token.Email
                 session.user.avatar = token.avatar
+            
             }
+
             return session
         },
     }

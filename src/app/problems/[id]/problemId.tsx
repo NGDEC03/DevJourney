@@ -37,7 +37,7 @@ const problemData = {
 };`
 }
 
-export default function ProblemPage({ id }: {id:string} ) {
+export default function ProblemPage({ id1 }: any ) {
 
     const [code, setCode] = useState(problemData.starterCode)
 
@@ -55,7 +55,7 @@ export default function ProblemPage({ id }: {id:string} ) {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <CardTitle className='text-2xl'>{problemData.title}</CardTitle>
-                                    <CardDescription >Problem #{id}</CardDescription>
+                                    <CardDescription >Problem #{id1.id}</CardDescription>
                                 </div>
                                 <Badge className={problemData.difficulty === "Easy" ? "bg-green-600 text-green-100" : problemData.difficulty === "Medium" ? "bg-yellow-600 text-yellow-100" : "bg-red-600 text-red-100"}>
                                     {problemData.difficulty}

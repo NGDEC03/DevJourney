@@ -1,12 +1,12 @@
 import React from 'react'
 import ProblemPage from './problemId'
 
-async function page({ params }: { params: { id: string } }) {
-    const {id}=await params
+async function page({ params }: { params: Promise<string> }) {
+    const id=await params
 
 
     return (
-        <ProblemPage id={id}></ProblemPage>
+        <ProblemPage id1={id}></ProblemPage>
     )
 }
 
