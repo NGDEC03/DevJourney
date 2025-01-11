@@ -1,66 +1,78 @@
-import { prisma } from "@/prismaClient";
-import NextAuth, { NextAuthOptions } from "next-auth";
-import CredentialsProvider  from "next-auth/providers/credentials";
-interface User {
-    id:string
-    userName: string
-    Name: string
-    Email: string
-    avatar?: string
-  }
+import { PrismaClient } from "@prisma/client";
+import { User, Session } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { JWT } from "next-auth/jwt";
+import NextAuth from "next-auth/next";
+import bcrypt from 'bcrypt';
 
-const options: NextAuthOptions = {
+const prisma = new PrismaClient();
+
+const authOptions = {
     providers: [
         CredentialsProvider({
             name: "Credentials",
             credentials: {
-                username: { label: "username", type: "text" },
-                password: { label: "password", type: "password" }
+                username: { label: "Username", type: "text" },
+                password: { label: "Password", type: "password" },
             },
-            async authorize(credentials: any) {
-                const user = await prisma.user.findUnique({
+            async authorize(credentials) {
+                if (!credentials?.username || !credentials.password) {
+                    throw new Error("Invalid credentials");
+                }
+
+                const user = await prisma.user.findFirst({
                     where: {
-                        userName: credentials.username
-                    }
-                })
+                        userName: credentials.username,
+                    },
+                });
+
+                if (!user) {
+                    throw new Error("No user found");
+                }
+
+                const valid = await bcrypt.compare(credentials.password, user.password);
+                if (!valid) {
+                    throw new Error("Invalid password");
+                }
+
                 return {
-                    ...user,
-                    id: "21"
-                } as User
-            }
-        })
+                    id: '21',
+                    userName: user.userName,
+                    Name: user.name,
+                    Email: user.email,
+                    avatar: user.avatar || "default-avatar",
+                };
+            },
+        }),
     ],
     pages: {
-        signIn: "/login"
+        signIn: "/login",
     },
+    secret: process.env.SECRET || "default",
     callbacks: {
-        async jwt({ token, user }:{token:any,user:any}) {
-            console.log(user);
-            
+        async jwt({ token, user }: { token: JWT; user: User | undefined }) {
             if (user) {
-                token.userName = user.userName
-                token.Name = user.Name
-                token.Email=user.Email
-                token.avatar = user.avatar || "default-avatar"
+                token.id = user.id;
+                token.userName = user.userName;
+                token.Name = user.Name;
+                token.Email = user.Email;
+                token.avatar = user.avatar || "default-avatar";
             }
-            return token
+            return token;
         },
-        async session({ token, session }) {
-            console.log(token);
-            
+        async session({ session, token }: { session: Session; token: JWT }) {
             if (session.user) {
-                // session.user.email="ngdec03"
-                session.user.userName = token.userName
-                session.user.Name = token.Name
-                session.user.Email=token.Email
-                session.user.avatar = token.avatar
-            
+                session.user.id = token.id;
+                session.user.userName = token.userName;
+                session.user.Name = token.Name;
+                session.user.Email = token.Email;
+                session.user.avatar = token.avatar;
             }
-
-            return session
+            return session;
         },
-    }
-}
+    },
+};
+// @ts-expect-error - nessasary for next-auth
+const handler = NextAuth(authOptions);
 
-export const GET=NextAuth(options)
-export const POST=NextAuth(options)
+export { handler as GET, handler as POST };

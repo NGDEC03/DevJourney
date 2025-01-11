@@ -1,5 +1,4 @@
 import { prisma } from "@/prismaClient";
-import { stat } from "fs";
 import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     try {
@@ -10,12 +9,13 @@ export async function POST(req: NextRequest) {
             },
             include: {
                 problems: true,
-                submissions:true
+                submissions: true
             }
         })
         return NextResponse.json(user, { status: 201 })
     }
     catch (err) {
+        console.error(err)
         return NextResponse.json({ err: "Some Error Occured!" }, { status: 500 })
     }
 }

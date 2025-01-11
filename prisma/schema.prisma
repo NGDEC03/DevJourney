@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,36 +10,41 @@ datasource db {
 
 model User {
   userName         String       @id @unique
-  Email            String       @unique
-  Name             String?
+  email            String       @unique
+  name             String?
   password         String
-  cName            String?
+  companyName      String?
   acceptanceRate   Float?
   createdAt        DateTime     @default(now())
   tags             String[]
-  problems         Problem[]
-  avatar          String?
+  problems         Problem[]    @relation("UserProblems")
+  avatar           String?
   submissions      Submission[]
   streak           Int          @default(0)
   ranking          Int?
   learningProgress Float?
+
+  @@index([email])
 }
 
 model Problem {
-  problemId   Int          @id @default(autoincrement())
-  problemName String
-  userName    String
-  problemD    String
-  difficulty  String
-  nTried      Int          @default(0)
-  nSuccess    Int          @default(0)
-  timeLimit   Int
-  memoryLimit Int
-  tCases      Case[]
-  user        User?        @relation(fields: [userName], references: [userName])
-  Tag         String[]
-  submissions Submission[]
-  createdAt   DateTime     @default(now())
+  problemId     Int          @id @default(autoincrement())
+  problemName   String
+  problemDescription String
+  difficulty    String
+  attemptCount  Int          @default(0)
+  successCount  Int          @default(0)
+  timeLimit     Int
+  memoryLimit   Int
+  tags          String[]
+  createdAt     DateTime     @default(now())
+
+  userName      String?
+  user          User?        @relation("UserProblems", fields: [userName], references: [userName])
+  testCases     Case[]
+  submissions   Submission[]
+
+  @@index([problemName])
 }
 
 model Case {
@@ -46,20 +52,24 @@ model Case {
   input       String
   output      String
   explanation String?
+
   problemId   Int
   problem     Problem @relation(fields: [problemId], references: [problemId])
 }
 
 model Submission {
   id          Int      @id @default(autoincrement())
-  userId      String
-  problemId   Int
   status      String
   language    String
   runtime     String?
   memory      String?
   submittedAt DateTime @default(now())
+
+  userId      String
+  problemId   Int
+
   user        User     @relation(fields: [userId], references: [userName])
   problem     Problem  @relation(fields: [problemId], references: [problemId])
-}
 
+  @@index([userId, problemId])
+}

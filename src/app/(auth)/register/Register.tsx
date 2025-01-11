@@ -6,9 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 
-import { AlertCircle, CircleArrowOutUpLeftIcon, Link2, LinkIcon} from 'lucide-react'
+import { AlertCircle, CircleArrowOutUpLeftIcon } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { TagSelector } from '@/components/TagSelector'
 
@@ -22,7 +22,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const router = useRouter()
-  const {toast}=useToast()
+  const { toast } = useToast()
 
   const handleInitialRegister = (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,27 +34,25 @@ export default function RegisterPage() {
   }
 
   const handleTopicsSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try{
-const res=await axios.post("/api/register",{Email:email,password,selectedTags,Name:name})
-
-
-    }
-    catch(err){
+    e.preventDefault();
+    try {
+      await axios.post("/api/register", { Email: email, password, selectedTags, Name: name });
+      toast({
+        title: "🎉 Registration Successful!",
+        description: "You're all set! 🚀 Login to explore your dashboard.",
+        duration: 2000,
+      });
+      router.push('/login');
+    } catch (err) {
+      const errM = err as AxiosError<{message: string}>;
+      const errorMessage = errM.response?.data?.message || errM.message || 'Registration failed';
       toast({
         title: "⚠️ Registration Failed",
-        description: err as string,
-        variant: "destructive", 
-        duration: 2000, 
+        description: errorMessage,
+        variant: "destructive",
+        duration: 2000,
       });
-      return
     }
-    toast({
-      title: "🎉 Registration Successful!",
-      description: "You're all set! 🚀 Login to explore your dashboard.", 
-      duration: 2000, 
-    });
-    router.push('/login')
   }
 
   const handleSkip = () => {
@@ -62,15 +60,15 @@ const res=await axios.post("/api/register",{Email:email,password,selectedTags,Na
     router.push('/login')
   }
 
-  
+
   return (
     <div className="container mx-auto flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>{step === 1 ? 'Register' : 'Your Coding Interests'}</CardTitle>
           <CardDescription>
-            {step === 1 
-              ? 'Create a new account to get started' 
+            {step === 1
+              ? 'Create a new account to get started'
               : 'Select or add your coding interests or skills'}
           </CardDescription>
         </CardHeader>
@@ -115,9 +113,9 @@ const res=await axios.post("/api/register",{Email:email,password,selectedTags,Na
                 </Alert>
               )}
               <Button type="submit" className="w-full">Next</Button>
-              
+
             </form>
-            
+
           ) : (
             <form onSubmit={handleTopicsSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -141,16 +139,16 @@ const res=await axios.post("/api/register",{Email:email,password,selectedTags,Na
             <span className="text-muted-foreground">
               Already have an account?{' '}
             </span>
-       
-           <Link href='/login' className='ml-2'>
-           <CircleArrowOutUpLeftIcon
-         ></CircleArrowOutUpLeftIcon>
-           </Link>
-           
+
+            <Link href='/login' className='ml-2'>
+              <CircleArrowOutUpLeftIcon
+              ></CircleArrowOutUpLeftIcon>
+            </Link>
+
           </div>
         </CardContent>
       </Card>
-      
+
     </div>
   )
 }
