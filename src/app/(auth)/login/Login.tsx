@@ -5,18 +5,20 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 import { Button } from "@/components/ui/button"
+import { useToast } from '@/components/ui/use-toast'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { AlertCircle,CircleArrowOutUpLeftIcon,PersonStanding } from 'lucide-react'
+import { AlertCircle,CircleArrowOutUpLeftIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { signIn } from 'next-auth/react'
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const {toast}=useToast()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string|undefined|null>('')
+  const [error] = useState<string|undefined|null>('')
   const router = useRouter()
 
 
@@ -31,15 +33,24 @@ export default function LoginPage() {
       const res = await signIn("credentials", {
         username,
         password,
-        redirect: false, // Prevent automatic redirect
-        callbackUrl: "/dashboard", // Custom callback URL
+        redirect: false, 
+        callbackUrl: "/dashboard", 
       });
   
       if (res?.error) {
-        console.error(res.error); // Handle error if login fails
+        toast({
+          title: "⚠️ Login Failed",
+          description: res.error as string,
+          variant: "destructive", 
+          duration: 2000, 
+        });
       } else {
-        // Redirect to the callbackUrl
-        router.push(res?.url || "/dashboard"); // Redirect to the desired page ("/dashboard")
+        toast({
+          title: "🎉 Registration Successful!",
+          description: "You're all set! 🚀 Login to explore your dashboard.", 
+          duration: 1000, 
+        });
+        router.push(res?.url || "/dashboard"); 
       }
     }
 
@@ -83,7 +94,7 @@ export default function LoginPage() {
           </form>
           <div className="mt-6 text-center text-sm flex justify-center">
             <span className="text-muted-foreground">
-              Don't have an account?{' '}
+              Dont&apos; have an account?{' '}
             </span>
             <Link href='/register' className='ml-2'>
          <CircleArrowOutUpLeftIcon
