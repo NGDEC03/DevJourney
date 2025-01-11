@@ -1,6 +1,7 @@
 import { prisma } from "@/prismaClient";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
+import { stderr, stdout } from "process";
 
 interface LangInt {
     id: number;
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
     try {
         const { problemId, language, code } = await req.json();
 
+
         const problem = await prisma.problem.findUnique({
             where: { problemId },
             include: { tCases: true },
@@ -61,7 +63,12 @@ export async function POST(req: NextRequest) {
             "Content-Type": "application/json",
         };
 
-        for (const testCase of problem.tCases) {
+        for (let i=0;i<1;i++) {
+            const testCase={
+                input:"1 2 3\n",
+                output:"3",
+                caseId:1
+            }
             const options = {
                 method: "POST",
                 url: "https://judge029.p.rapidapi.com/submissions",
@@ -77,11 +84,15 @@ export async function POST(req: NextRequest) {
 
             try {
                 const response = await axios.request(options);
-
+                console.log(response);
+                
                 results.push({
                     testCaseId: testCase.caseId,
-                    status: response.data.status.description, // E.g., "Accepted" or "Wrong Answer"
-                    output: response.data.stdout,
+                    status: response.data.status.description, 
+                    stderr:response.data.stderr,
+                    stdout:response.data.stdout,
+                    timeTaken:response.data.time,
+                    memoryUsage:response.data.memory,
                     expected: testCase.output,
                 });
             } catch (error) {
