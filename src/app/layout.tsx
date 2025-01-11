@@ -33,9 +33,9 @@ export default function RootLayout({
       <SessionWrapper>
       <Header></Header>
           <main className="flex-1">{children}</main>
+  <Footer></Footer>
       </SessionWrapper>
           <Toaster/>
-  <Footer></Footer>
          
         </body>
     </html>

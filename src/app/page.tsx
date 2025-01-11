@@ -1,12 +1,24 @@
 "use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import Loader from '@/lib/loader.gif'
 import { Input } from "@/components/ui/input"
 import { useSession } from "next-auth/react"
-import { Code2, GraduationCap, Users, Github } from 'lucide-react'
+import { Code2, GraduationCap, Users, Github, Loader2 } from 'lucide-react'
+import Image from "next/image"
 
 export default function LandingPage() {
-  const {data:session}=useSession()
+  const {data:session,status}=useSession()
+  const isLoggedIn = status === "authenticated";
+
+
+  if (status==="loading") {
+    return (
+     <div className="w-screen h-screen flex items-center justify-center">
+       <Image className="scale-50" src={Loader} alt="Loading..."/>
+     </div>
+    );
+  }
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">

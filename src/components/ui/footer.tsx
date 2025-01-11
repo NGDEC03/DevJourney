@@ -1,7 +1,21 @@
+"use client"
+import { useSession } from 'next-auth/react';
 import Link  from 'next/link'
 import React from 'react'
 
 export default function Footer() {
+   const { data: session, status } = useSession();
+  
+    // Check if the session is loading or not authenticated
+    const isLoggedIn = status === "authenticated";
+    const isLoading = status === "loading";  // Add loading check
+  
+    if (isLoading) {
+      return (
+        <></>
+      );
+    }
+  
   return (
 
      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
