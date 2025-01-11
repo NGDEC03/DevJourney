@@ -46,7 +46,7 @@ export default function LoginPage() {
         });
       } else {
         toast({
-          title: "🎉 Registration Successful!",
+          title: "🎉 Login Successful!",
           description: "You're all set! 🚀 Login to explore your dashboard.", 
           duration: 1000, 
         });
