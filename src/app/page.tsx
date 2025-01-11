@@ -8,16 +8,24 @@ import { Code2, GraduationCap, Users, Github, Loader2 } from 'lucide-react'
 import Image from "next/image"
 
 export default function LandingPage() {
-  const {data:session,status}=useSession()
+  const {data:session,status}=useSession({required:false})
   const isLoggedIn = status === "authenticated";
-
-
   if (status==="loading") {
     return (
-     <div className="w-screen h-screen flex items-center justify-center">
-       <Image className="scale-50" src={Loader} alt="Loading..."/>
-     </div>
-    );
+      <div className="w-screen h-screen flex flex-col items-center justify-center">
+      <Image className="scale-50" src={Loader} alt="Loading..." />
+      <div className="mt-8 text-center">
+        <p className="text-2xl md:text-3xl font-bold text-white mb-2 animate-pulse">
+          Hang tight, we're powering up!
+        </p>
+        <p className="text-lg md:text-xl  opacity-80">
+          <span className="inline-block animate-bounce ">⚡</span> Supercharging your coding experience <span className="inline-block animate-bounce">⚡</span>
+        </p>
+        <p className="mt-4 text-lg md:text-base  opacity-70 animate-pulse">
+          Taking too long? Hit <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-white rounded-lg shadow-sm">CTRL</kbd> + <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-white rounded-lg shadow-sm">R</kbd>
+        </p>
+      </div>
+    </div>)
   }
   return (
     <div className="flex flex-col min-h-screen">

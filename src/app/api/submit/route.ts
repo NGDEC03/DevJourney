@@ -8,21 +8,18 @@ interface LangInt {
 }
 
 const getLanguageId = async (language: string): Promise<number | null> => {
-    const apiUrl = "https://judge029.p.rapidapi.com/languages";
-    const apiHeaders = {
-        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
-        "x-rapidapi-host": "judge029.p.rapidapi.com",
-    };
-
     try {
-        const response = await axios.get(apiUrl, { headers: apiHeaders });
-        const languages: LangInt[] = response.data;
-        const languageMatch = languages.find((lang) =>
+        const response = await axios.get("https://judge029.p.rapidapi.com/languages", {
+            headers: {
+                "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+                "x-rapidapi-host": "judge029.p.rapidapi.com",
+            },
+        });
+        const languageMatch = response.data.find((lang: LangInt) =>
             lang.name.toLowerCase().includes(language.toLowerCase())
         );
         return languageMatch ? languageMatch.id : null;
-    } catch (error) {
-        console.error("Error fetching language ID:", error);
+    } catch {
         return null;
     }
 };
@@ -30,25 +27,26 @@ const getLanguageId = async (language: string): Promise<number | null> => {
 const submitCode = async (
     code: string,
     languageId: number,
-    testCase: { input: string; output: string; caseId: number },
-    apiHeaders: Record<string, string>
+    testCase: { input: string; output: string; caseId: number }
 ) => {
-    const apiUrl = "https://judge029.p.rapidapi.com/submissions";
-    const options = {
-        method: "POST",
-        url: apiUrl,
-        params: { base64_encoded: "false", wait: "true", fields: "*" },
-        headers: apiHeaders,
-        data: {
-            source_code: code,
-            language_id: languageId,
-            stdin: testCase.input,
-            expected_output: testCase.output,
-        },
-    };
-
     try {
-        const response = await axios.request(options);
+        const response = await axios.post(
+            "https://judge029.p.rapidapi.com/submissions",
+            {
+                source_code: code,
+                language_id: languageId,
+                stdin: testCase.input,
+                expected_output: testCase.output,
+            },
+            {
+                params: { base64_encoded: "false", wait: "true", fields: "*" },
+                headers: {
+                    "x-rapidapi-key": process.env.RAPIDAPI_KEY || "#",
+                    "x-rapidapi-host": "judge029.p.rapidapi.com",
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         return {
             testCaseId: testCase.caseId,
             status: response.data.status.description,
@@ -58,65 +56,58 @@ const submitCode = async (
             memoryUsage: response.data.memory,
             expected: testCase.output,
         };
-    } catch (error) {
-        console.error("Error during submission:", error);
-        return {
-            testCaseId: testCase.caseId,
-            status: "Error",
-            error: "Submission failed due to an internal error.",
-        };
+    } catch {
+        return { testCaseId: testCase.caseId, status: "Error" };
     }
 };
 
 export async function POST(req: NextRequest) {
     try {
         const { problemId, language, code, userName } = await req.json();
-
         const problem = await prisma.problem.findUnique({
-            where: { problemId },
+            where: { problemId: parseInt(problemId) },
             include: { tCases: true },
         });
 
-        if (!problem) {
-            return NextResponse.json({ error: "Problem not found" }, { status: 404 });
-        }
+        if (!problem) return NextResponse.json({ error: "Problem not found" }, { status: 404 });
 
         const languageId = await getLanguageId(language);
-        if (!languageId) {
-            return NextResponse.json(
-                { error: "Unsupported language" },
-                { status: 400 }
-            );
-        }
-
-        const apiHeaders = {
-            "x-rapidapi-key": process.env.RAPIDAPI_KEY || "#" ,
-            "x-rapidapi-host": "judge029.p.rapidapi.com",
-            "Content-Type": "application/json",
-        };
+        if (!languageId) return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
 
         const results = await Promise.all(
             problem.tCases.map((testCase) =>
-                submitCode(code, languageId, testCase, apiHeaders)
+                submitCode(code, languageId, testCase)
             )
         );
 
         const allPassed = results.every((result) => result.status === "Accepted");
-        const overallStatus = allPassed ? "All Test Cases Passed" : "Some Test Cases Failed";
+        const overallStatus = allPassed ? "Accepted" : "Failed";
 
-        await prisma.problem.update({
-            where: { problemId },
+        const submission = await prisma.submission.create({
             data: {
-                user: { connect: { userName } },
+                userId: userName,
+                problemId: problem.problemId,
+                status: overallStatus,
+                language,
+                runtime: results[0]?.timeTaken || null,
+                memory: results[0]?.memoryUsage || null,
             },
         });
 
-        return NextResponse.json({ status: overallStatus, results });
-    } catch (error) {
-        console.error("Error in submit API:", error);
-        return NextResponse.json(
-            { error: "An internal error occurred" },
-            { status: 500 }
-        );
+        await prisma.problem.update({
+            where: { problemId: problem.problemId },
+            data: {
+                nTried: { increment: 1 },
+                ...(allPassed && { nSuccess: { increment: 1 } }),
+            },
+        });
+
+        return NextResponse.json({
+            status: overallStatus,
+            results,
+            submissionId: submission.id,
+        });
+    } catch {
+        return NextResponse.json({ error: "An internal error occurred" }, { status: 500 });
     }
 }

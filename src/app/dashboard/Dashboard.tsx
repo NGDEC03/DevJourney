@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,38 +9,53 @@ import { BarChart, Code, Trophy, BookOpen, CheckCircle, Clock, PieChartIcon, XCi
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useSession } from 'next-auth/react'
+import axios from 'axios'
 
 export default function DashboardPage() {
-  const {data:session}=useSession()
-  const [recentProblems] = useState([
-    { id: 1, name: 'Two Sum', difficulty: 'Easy', completed: true },
-    { id: 2, name: 'Longest Substring Without Repeating Characters', difficulty: 'Medium', completed: false },
-    { id: 3, name: 'Median of Two Sorted Arrays', difficulty: 'Hard', completed: false },
-  ])
+  const { data: session } = useSession()
+  const [userStats, setUserStats] = useState(null)
+  const [recentProblems, setRecentProblems] = useState([])
+  const [problemDistribution, setProblemDistribution] = useState([])
+  const [submissions, setSubmissions] = useState([])
 
-  const [upcomingContests] = useState([
-    { id: 1, name: 'Weekly Contest 342', date: '2023-07-15 14:00 UTC' },
-    { id: 2, name: 'Biweekly Contest 105', date: '2023-07-22 14:00 UTC' },
-  ])
+  useEffect(() => {
+    if (session?.user?.userName) {
+      const fetchDashboardData = async () => {
+        try {
+          const statsResponse = await axios.get(`/api/user-stats?userName=${session.user.userName}`)
+          const stats = statsResponse.data
+          setUserStats(stats)
 
-  const [problemDistribution] = useState([
-    { name: 'Easy', value: 120, color: '#4ade80' },
-    { name: 'Medium', value: 80, color: '#fbbf24' },
-    { name: 'Hard', value: 47, color: '#f87171' },
-  ])
+          const problemsResponse = await axios.get(`/api/recent-problems?userName=${session.user.userName}`)
+          const problems = problemsResponse.data
+          setRecentProblems(problems)
 
-  const [submissions] = useState([
-    { id: 1, problem: 'Two Sum', status: 'Accepted', language: 'JavaScript', runtime: '76 ms', memory: '42.1 MB', submitted: '2023-07-10' },
-    { id: 2, problem: 'Reverse Integer', status: 'Wrong Answer', language: 'Python', runtime: '32 ms', memory: '14.2 MB', submitted: '2023-07-09' },
-    { id: 3, problem: 'Palindrome Number', status: 'Accepted', language: 'Java', runtime: '11 ms', memory: '41.6 MB', submitted: '2023-07-08' },
-    { id: 4, problem: 'Roman to Integer', status: 'Time Limit Exceeded', language: 'C++', runtime: 'N/A', memory: 'N/A', submitted: '2023-07-07' },
-    { id: 5, problem: 'Longest Common Prefix', status: 'Accepted', language: 'JavaScript', runtime: '68 ms', memory: '40.8 MB', submitted: '2023-07-06' },
-  ])
+          const distributionResponse = await axios.get(`/api/problem-distribution?userName=${session.user.userName}`)
+          const distribution = distributionResponse.data
+          setProblemDistribution(distribution)
+
+          const submissionsResponse = await axios.get(`/api/recent-submissions?userName=${session.user.userName}`)
+          const recentSubmissions = submissionsResponse.data
+          setSubmissions(recentSubmissions)
+        } catch (error) {
+          console.error('Error fetching dashboard data:', error)
+        }
+      }
+
+      fetchDashboardData()
+      console.log(userStats);
+      
+    }
+  }, [session])
+
+  if (!userStats) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Welcome back, {session?.user?.userName?session.user.userName:"Coder!"}</h1>
-      
+      <h1 className="text-3xl font-bold mb-6">Welcome back, {session?.user?.Name || "Coder"}!</h1>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -48,8 +63,8 @@ export default function DashboardPage() {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold"></div>
-            <p className="text-xs text-muted-foreground">+23 from last week</p>
+            <div className="text-2xl font-bold">{userStats.totalSolved}</div>
+            <p className="text-xs text-muted-foreground">+{userStats.solvedLastWeek} from last week</p>
           </CardContent>
         </Card>
         <Card>
@@ -58,7 +73,7 @@ export default function DashboardPage() {
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15 days</div>
+            <div className="text-2xl font-bold">{userStats.streak} days</div>
             <p className="text-xs text-muted-foreground">Keep it up!</p>
           </CardContent>
         </Card>
@@ -68,8 +83,8 @@ export default function DashboardPage() {
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5,267</div>
-            <p className="text-xs text-muted-foreground">Top 10% worldwide</p>
+            <div className="text-2xl font-bold">{userStats.ranking}</div>
+            <p className="text-xs text-muted-foreground">Top {userStats.rankingPercentile}% worldwide</p>
           </CardContent>
         </Card>
         <Card>
@@ -78,8 +93,8 @@ export default function DashboardPage() {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">72%</div>
-            <Progress value={72} className="mt-2" />
+            <div className="text-2xl font-bold">{Math.round(userStats.learningProgress * 100)}%</div>
+            <Progress value={userStats.learningProgress * 100} className="mt-2" />
           </CardContent>
         </Card>
       </div>
@@ -93,16 +108,15 @@ export default function DashboardPage() {
           <CardContent>
             <ul className="space-y-2">
               {recentProblems.map((problem) => (
-                <li key={problem.id} className="flex items-center justify-between">
+                <li key={problem.problemId} className="flex items-center justify-between">
                   <div className="flex items-center">
                     <Code className="h-4 w-4 mr-2" />
-                    <span>{problem.name}</span>
+                    <span>{problem.problemName}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className={`text-xs mr-2 ${
-                      problem.difficulty === 'Easy' ? 'text-green-500' :
-                      problem.difficulty === 'Medium' ? 'text-yellow-500' : 'text-red-500'
-                    }`}>
+                    <span className={`text-xs mr-2 ${problem.difficulty === 'Easy' ? 'text-green-500' :
+                        problem.difficulty === 'Medium' ? 'text-yellow-500' : 'text-red-500'
+                      }`}>
                       {problem.difficulty}
                     </span>
                     {problem.completed && <CheckCircle className="h-4 w-4 text-green-500" />}
@@ -158,31 +172,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Contests</CardTitle>
-          <CardDescription>Participate and improve your skills</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2">
-            {upcomingContests.map((contest) => (
-              <li key={contest.id} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Trophy className="h-4 w-4 mr-2" />
-                  <span>{contest.name}</span>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 mr-2" />
-                  <span className="text-xs">{contest.date}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <Button className="w-full mt-4" variant="outline">
-            <Link href="/compete">View All Contests</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      
 
       <Card>
         <CardHeader>
@@ -204,7 +194,7 @@ export default function DashboardPage() {
             <TableBody>
               {submissions.map((submission) => (
                 <TableRow key={submission.id}>
-                  <TableCell className="font-medium">{submission.problem}</TableCell>
+                  <TableCell className="font-medium">{submission.problem.problemName}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       {submission.status === 'Accepted' ? (
@@ -218,7 +208,7 @@ export default function DashboardPage() {
                   <TableCell>{submission.language}</TableCell>
                   <TableCell>{submission.runtime}</TableCell>
                   <TableCell>{submission.memory}</TableCell>
-                  <TableCell>{submission.submitted}</TableCell>
+                  <TableCell>{new Date(submission.submittedAt).toLocaleString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

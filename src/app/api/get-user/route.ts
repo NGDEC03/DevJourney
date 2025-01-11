@@ -9,7 +9,8 @@ export async function POST(req: NextRequest) {
                 userName
             },
             include: {
-                problems: true
+                problems: true,
+                submissions:true
             }
         })
         return NextResponse.json(user, { status: 201 })

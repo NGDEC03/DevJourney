@@ -8,31 +8,37 @@ datasource db {
 }
 
 model User {
-  userName       String    @id @unique
-  Email          String    @unique
-  Name           String?
-  password       String
-  cName          String?
-  acceptanceRate Float?
-  createdAt      DateTime  @default(now())
-  tags           String[]
-  problems       Problem[]
-  
+  userName         String       @id @unique
+  Email            String       @unique
+  Name             String?
+  password         String
+  cName            String?
+  acceptanceRate   Float?
+  createdAt        DateTime     @default(now())
+  tags             String[]
+  problems         Problem[]
+  avatar          String?
+  submissions      Submission[]
+  streak           Int          @default(0)
+  ranking          Int?
+  learningProgress Float?
 }
 
 model Problem {
-  problemId   Int    @id @default(autoincrement())
+  problemId   Int          @id @default(autoincrement())
   problemName String
   userName    String
   problemD    String
   difficulty  String
-  nTried      Int @default(0)
-  nSuccess    Int @default(0)
+  nTried      Int          @default(0)
+  nSuccess    Int          @default(0)
   timeLimit   Int
   memoryLimit Int
   tCases      Case[]
-  user        User?   @relation(fields: [userName], references: [userName])
+  user        User?        @relation(fields: [userName], references: [userName])
   Tag         String[]
+  submissions Submission[]
+  createdAt   DateTime     @default(now())
 }
 
 model Case {
@@ -43,3 +49,17 @@ model Case {
   problemId   Int
   problem     Problem @relation(fields: [problemId], references: [problemId])
 }
+
+model Submission {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  problemId   Int
+  status      String
+  language    String
+  runtime     String?
+  memory      String?
+  submittedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [userName])
+  problem     Problem  @relation(fields: [problemId], references: [problemId])
+}
+
