@@ -68,17 +68,19 @@ export async function POST(req: NextRequest) {
             where: { problemId: parseInt(problemId) },
             include: { testCases: true },
         });
-
+        
         if (!problem) return NextResponse.json({ error: "Problem not found" }, { status: 404 });
-
+        
         const languageId = await getLanguageId(language);
         if (!languageId) return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
-
+        
+        console.log(problem, languageId);
         const results = await Promise.all(
             problem.testCases.map((testCase) =>
                 submitCode(code, languageId, testCase)
             )
         );
+        console.log(results);
 
         const allPassed = results.every((result) => result.status === "Accepted");
         const overallStatus = allPassed ? "Accepted" : "Failed";
@@ -93,16 +95,23 @@ export async function POST(req: NextRequest) {
                 memory: results[0]?.memoryUsage || null,
             },
         });
-
+        
         await prisma.problem.update({
             where: { problemId: problem.problemId },
             data: {
                 attemptCount: { increment: 1 },
-                ...(allPassed && { nSuccess: { increment: 1 } }),
+                ...(allPassed && { successCount: { increment: 1 } }),
                 ...(allPassed && { user: { connect: { userName } } })
             },
         });
 
+        await prisma.user.update({
+            where: { userName: userName },
+            data: {
+                ...(allPassed && { streak: { increment: 1 } })
+            }
+        })
+        
         await prisma.submission.update({
             where: { id: submission.id },
             data: {
@@ -110,7 +119,9 @@ export async function POST(req: NextRequest) {
                 user: { connect: { userName } }
             }
         })
-
+        
+        console.log("here")
+        console.log(allPassed)
         return NextResponse.json({
             status: overallStatus,
             results,
