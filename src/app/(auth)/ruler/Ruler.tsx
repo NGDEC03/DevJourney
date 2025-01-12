@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { signIn } from 'next-auth/react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertCircle,CircleArrowOutUpLeftIcon,PersonStanding } from 'lucide-react'
 import Link from 'next/link'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useToast } from '@/components/ui/use-toast'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -16,16 +18,33 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const router = useRouter()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
+    const {toast}=useToast()
     e.preventDefault()
     // Here you would typically call an API to authenticate the user
     // For this example, we'll just simulate a successful login
-    if (username && password) {
-      console.log('Logging in with:', username, password)
-      router.push('/dashboard')
-    } else {
-      setError('Please fill in all fields')
-    }
+      const res = await signIn("user-login", {
+            username,
+            password,
+            redirect: true, 
+            callbackUrl: "/dashboard", 
+          });
+      
+          if (res?.error) {
+            toast({
+              title: "⚠️ Login Failed",
+              description: res.error as string,
+              variant: "destructive", 
+              duration: 2000, 
+            });
+          } else {
+            toast({
+              title: "🎉 Login Successful!",
+              description: "You're all set! 🚀 Login to explore your dashboard.", 
+              duration: 1000, 
+            });
+            router.push(res?.url || "/ruler/dashboard"); 
+          }
   }
 
   return (

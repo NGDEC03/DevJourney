@@ -12,6 +12,7 @@ const authOptions = {
     providers: [
         CredentialsProvider({
             name: "Credentials",
+            id:"user-login",
             credentials: {
                 username: { label: "Username", type: "text" },
                 password: { label: "Password", type: "password" },
@@ -43,6 +44,43 @@ const authOptions = {
                     Name: user.name,
                     Email: user.email,
                     avatar: user.avatar || "default-avatar",
+                };
+            },
+        }),
+        CredentialsProvider({
+            name: "Admin Credentials",
+            id:"admin-login",
+            credentials: {
+                username: { label: "Admin Username", type: "text" },
+                password: { label: "Admin Password", type: "password" },
+            },
+            async authorize(credentials) {
+                if (!credentials?.username || !credentials.password) {
+                    throw new Error("Invalid credentials");
+                }
+
+                const admin = await prisma.user.findUnique({
+                    where: {
+                        userName: credentials.username,
+                    },
+                });
+
+                if (!admin || admin.role !== "admin") { // Ensure the user is an admin
+                    throw new Error("No admin found or unauthorized access");
+                }
+
+                const valid = await bcrypt.compare(credentials.password, admin.password);
+                if (!valid) {
+                    throw new Error("Invalid password");
+                }
+
+                return {
+                    id: '212',
+                    userName: admin.userName,
+                    Name: admin.name,
+                    Email: admin.email,
+                    avatar: admin.avatar || "default-avatar",
+                    role: admin.role,
                 };
             },
         }),

@@ -30,10 +30,10 @@ export default function LoginPage() {
       const username = form.username.value;
       const password = form.password.value;
   
-      const res = await signIn("credentials", {
+      const res = await signIn("user-login", {
         username,
         password,
-        redirect: false, 
+        redirect: true, 
         callbackUrl: "/dashboard", 
       });
   
