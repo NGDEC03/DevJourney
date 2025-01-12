@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         const { problemId, language, code, userName } = await req.json();
         const problem = await prisma.problem.findUnique({
             where: { problemId: parseInt(problemId) },
-            include: { tCases: true },
+            include: { testCases: true },
         });
 
         if (!problem) return NextResponse.json({ error: "Problem not found" }, { status: 404 });
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
         if (!languageId) return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
 
         const results = await Promise.all(
-            problem.tCases.map((testCase) =>
+            problem.testCases.map((testCase) =>
                 submitCode(code, languageId, testCase)
             )
         );
@@ -97,10 +97,19 @@ export async function POST(req: NextRequest) {
         await prisma.problem.update({
             where: { problemId: problem.problemId },
             data: {
-                nTried: { increment: 1 },
+                attemptCount: { increment: 1 },
                 ...(allPassed && { nSuccess: { increment: 1 } }),
+                ...(allPassed && { user: { connect: { userName } } })
             },
         });
+
+        await prisma.submission.update({
+            where: { id: submission.id },
+            data: {
+                problem: { connect: { problemId } },
+                user: { connect: { userName } }
+            }
+        })
 
         return NextResponse.json({
             status: overallStatus,

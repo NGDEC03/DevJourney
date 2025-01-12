@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import NextAuth from "next-auth/next";
 import bcrypt from 'bcrypt';
+import { userAgent } from "next/server";
 
 const prisma = new PrismaClient();
 
@@ -19,13 +20,14 @@ const authOptions = {
                 if (!credentials?.username || !credentials.password) {
                     throw new Error("Invalid credentials");
                 }
-
-                const user = await prisma.user.findFirst({
+                console.log(await prisma.user.findMany())
+                console.log(credentials.username + credentials.password);
+                const user = await prisma.user.findUnique({
                     where: {
                         userName: credentials.username,
                     },
                 });
-
+                console.log(user);
                 if (!user) {
                     throw new Error("No user found");
                 }

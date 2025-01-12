@@ -18,7 +18,7 @@ const problemData=await req.json() as ProblemInput
    
     const problem = await prisma.problem.create({
       data: {
-        problemD: problemData.problemD,
+        problemDescription: problemData.problemD,
         problemName: problemData.problemName,
         memoryLimit: problemData.memoryLimit,
         timeLimit: problemData.timeLimit,
