@@ -8,6 +8,8 @@ import { Code2, GraduationCap, Users, Github, Loader2 } from 'lucide-react'
 import Image from "next/image"
 
 export default function LandingPage() {
+  
+  
   const {data:session,status}=useSession({required:false})
   const isLoggedIn = status === "authenticated";
   if (status==="loading") {

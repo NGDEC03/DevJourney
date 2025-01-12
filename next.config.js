@@ -4,7 +4,7 @@ const nextConfig = {
     domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com'],
   },
   experimental: {
-    serverActions: true,
+    serverActions: {},
   }
 }
 

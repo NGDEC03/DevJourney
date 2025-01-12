@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Loader from '@/lib/loader.gif'
+import Ghost from '@/lib/1479.gif'
+import Loader from '@/lib/731.gif'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -19,54 +20,74 @@ export default function DashboardPage() {
   const [recentProblems, setRecentProblems] = useState([])
   const [problemDistribution, setProblemDistribution] = useState([])
   const [submissions, setSubmissions] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string|null>(null)
 
   useEffect(() => {
-    if (session?.user?.userName) {
-      const fetchDashboardData = async () => {
+    const fetchDashboardData = async () => {
+      if (session?.user?.userName) {
+        setLoading(true)
+        setError(null)
+
         try {
-          const statsResponse = await axios.get(`/api/user-stats?userName=${session.user.userName}`)
-          const stats = statsResponse.data
-          setUserStats(stats)
+          const [
+            statsResponse,
+            problemsResponse,
+            distributionResponse,
+            submissionsResponse,
+          ] = await Promise.all([
+            axios.get(`/api/user-stats?userName=${session.user.userName}`),
+            axios.get(`/api/recent-problems?userName=${session.user.userName}`),
+            axios.get(`/api/problem-distribution?userName=${session.user.userName}`),
+            axios.get(`/api/recent-submissions?userName=${session.user.userName}`),
+          ])
 
-          const problemsResponse = await axios.get(`/api/recent-problems?userName=${session.user.userName}`)
-          const problems = problemsResponse.data
-          setRecentProblems(problems)
-
-          const distributionResponse = await axios.get(`/api/problem-distribution?userName=${session.user.userName}`)
-          const distribution = distributionResponse.data
-          setProblemDistribution(distribution)
-
-          const submissionsResponse = await axios.get(`/api/recent-submissions?userName=${session.user.userName}`)
-          const recentSubmissions = submissionsResponse.data
-          setSubmissions(recentSubmissions)
-        } catch (error) {
-          console.error('Error fetching dashboard data:', error)
+          setUserStats(statsResponse.data)
+          setRecentProblems(problemsResponse.data)
+          setProblemDistribution(distributionResponse.data)
+          setSubmissions(submissionsResponse.data)
+        } catch (err) {
+          console.error('Error fetching dashboard data:', err)
+          setError('Failed to load dashboard data. Please try again later.')
+        } finally {
+          setLoading(false)
         }
       }
-
-      fetchDashboardData()
-      console.log(userStats);
-      
     }
+
+    fetchDashboardData()
   }, [session])
 
-  if (!userStats) {
-    return (<div className="w-screen h-screen flex flex-col items-center justify-center">
-      <Image className="scale-50" src={Loader} alt="Loading..." />
-      <div className="mt-8 text-center">
-        <p className="text-2xl md:text-3xl font-bold text-white mb-2 animate-pulse">
-          Hang tight, we're powering up!
-        </p>
-        <p className="text-lg md:text-xl  opacity-80">
-          <span className="inline-block animate-bounce ">⚡</span> Supercharging your coding experience <span className="inline-block animate-bounce">⚡</span>
-        </p>
-        <p className="mt-4 text-lg md:text-base  opacity-70 animate-pulse">
-          Taking too long? Hit <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-white rounded-lg shadow-sm">CTRL</kbd> + <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-white rounded-lg shadow-sm">R</kbd>
-        </p>
+  if (loading) {
+    return (
+      <div className="w-screen h-screen flex flex-col items-center justify-center">
+        <Image className="scale-100" src={Loader} alt="Loading..." />
+        {/* <div className='h-1/2'><iframe src="https://giphy.com/embed/gJ3mEToTDJn3LT6kCT" width="100%" height="100%"  frameBorder="0" className="giphy-embed" allowFullScreen></iframe></div><p><a href="https://giphy.com/gifs/juggling-load-malabares-gJ3mEToTDJn3LT6kCT"></a></p> */}
+        <div className="mt-8 text-center">
+          <p className="text-2xl md:text-3xl font-bold text-white mb-2 animate-pulse">
+            Hang tight, Loading Content!
+          </p>
+          <p className="text-lg md:text-xl opacity-80">
+            <span className="inline-block animate-bounce">⚡</span>  Hang tight, Loading Content! <span className="inline-block animate-bounce">⚡</span>
+          </p>
+          <p className="mt-4 text-lg md:text-base opacity-70 animate-pulse">
+            Taking too long? Hit <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-white rounded-lg shadow-sm">CTRL</kbd> + <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-white rounded-lg shadow-sm">R</kbd>
+          </p>
+        </div>
       </div>
-    </div>)
+    )
   }
 
+  if (error) {
+    return (
+      <div className="w-screen h-screen flex flex-col items-center justify-center">
+        <Image src={Ghost} alt='error'/>
+        <p className="text-2xl font-bold text-zinc-700 mb-4">Error</p>
+        <p className="text-lg text-gray-800">{error}</p>
+       
+      </div>
+    )
+  }
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Welcome back, {session?.user?.Name || "Coder"}!</h1>
@@ -98,8 +119,9 @@ export default function DashboardPage() {
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{userStats.ranking}</div>
-            <p className="text-xs text-muted-foreground">Top {userStats.rankingPercentile}% worldwide</p>
+            <div className="text-2xl font-bold">{userStats.ranking || "N/A"}</div>
+            <p className="text-xs text-muted-foreground">{userStats.ranking?
+            "Top "+userStats.rankingPercentile+"% " :"" } </p>
           </CardContent>
         </Card>
         <Card>
