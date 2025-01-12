@@ -1,6 +1,7 @@
 import { prisma } from "@/prismaClient";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
+import { subDays, isSameDay } from "date-fns";
 
 interface LangInt {
     id: number;
@@ -68,12 +69,12 @@ export async function POST(req: NextRequest) {
             where: { problemId: parseInt(problemId) },
             include: { testCases: true },
         });
-        
+
         if (!problem) return NextResponse.json({ error: "Problem not found" }, { status: 404 });
-        
+
         const languageId = await getLanguageId(language);
         if (!languageId) return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
-        
+
         console.log(problem, languageId);
         const results = await Promise.all(
             problem.testCases.map((testCase) =>
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
                 memory: results[0]?.memoryUsage || null,
             },
         });
-        
+
         await prisma.problem.update({
             where: { problemId: problem.problemId },
             data: {
@@ -104,14 +105,35 @@ export async function POST(req: NextRequest) {
                 ...(allPassed && { user: { connect: { userName } } })
             },
         });
-
-        await prisma.user.update({
-            where: { userName: userName },
-            data: {
-                ...(allPassed && { streak: { increment: 1 } })
+        const user = await prisma.user.findUnique({
+            userName,
+            include: {
+                submissions: true
             }
         })
-        
+
+        const lastSubmissionDate = user.submissions[user.submissions.length - 1].submittedAt
+        const today = new Date()
+        let streak = 1
+        const yesterday = subDays(today, 1)
+        if (lastSubmissionDate) {
+            const lastDate = new Date(lastSubmissionDate)
+            if (isSameDay(lastDate, yesterday)) {
+                streak = (user.streak || 0) + 1
+
+            }
+        }
+        await prisma.user.update({
+            where: {
+                userName
+            },
+            data: {
+                ...(allPassed && {
+                    streak
+                })
+            }
+        })
+
         await prisma.submission.update({
             where: { id: submission.id },
             data: {
@@ -119,7 +141,7 @@ export async function POST(req: NextRequest) {
                 user: { connect: { userName } }
             }
         })
-        
+
         console.log("here")
         console.log(allPassed)
         return NextResponse.json({
