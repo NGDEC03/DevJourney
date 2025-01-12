@@ -32,7 +32,7 @@ export default function LoginPage() {
     <div className="container mx-auto flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle>Login - Admin</CardTitle>
           <CardDescription>Welcome back! Please login to your account</CardDescription>
         </CardHeader>
         <CardContent>
@@ -66,14 +66,7 @@ export default function LoginPage() {
             )}
             <Button type="submit" className="w-full">Login</Button>
           </form>
-          <div className="mt-6 text-center text-sm flex justify-center">
-            <span className="text-muted-foreground">
-              Don't have an account?{' '}
-            </span>
-            <Link href='/register' className='ml-2'>
-         <CircleArrowOutUpLeftIcon
-         ></CircleArrowOutUpLeftIcon>
-           </Link>  </div>
+          
         </CardContent>
       </Card>
     </div>
