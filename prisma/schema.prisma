@@ -27,7 +27,7 @@ model User {
 }
 
 model Problem {
-  problemId          String   @id @map("_id") 
+  problemId          String   @id @map("_id") @default(auto()) @db.ObjectId
   problemName        String
   problemDescription String
   difficulty         String
@@ -47,7 +47,7 @@ model Problem {
 }
 
 model Case {
-  caseId      String  @id @map("_id") 
+  caseId      String  @id @map("_id") @default(auto()) @db.ObjectId
   input       String
   output      String
   explanation String?
@@ -57,7 +57,7 @@ model Case {
 }
 
 model Submission {
-  id          String   @id @map("_id")
+  id          String   @id @map("_id") @default(auto()) @db.ObjectId
   status      String
   language    String
   runtime     String?

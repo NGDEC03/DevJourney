@@ -28,7 +28,7 @@ const getLanguageId = async (language: string): Promise<number | null> => {
 const submitCode = async (
     code: string,
     languageId: number,
-    testCase: { input: string; output: string; caseId: number }
+    testCase: { input: string; output: string; caseId: string }
 ) => {
     try {
         const response = await axios.post(
@@ -65,10 +65,12 @@ const submitCode = async (
 export async function POST(req: NextRequest) {
     try {
         const { problemId, language, code, userName } = await req.json();
+        console.log(problemId, language, code, userName);
         const problem = await prisma.problem.findUnique({
-            where: { problemId: parseInt(problemId) },
+            where: { problemId: problemId },
             include: { testCases: true },
         });
+        
 
         if (!problem) return NextResponse.json({ error: "Problem not found" }, { status: 404 });
 
@@ -106,7 +108,7 @@ export async function POST(req: NextRequest) {
             },
         });
         const user = await prisma.user.findUnique({
-            userName,
+            where: { userName },
             include: {
                 submissions: true
             }
