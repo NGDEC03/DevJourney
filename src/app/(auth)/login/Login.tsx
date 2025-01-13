@@ -8,51 +8,66 @@ import { Button } from "@/components/ui/button"
 import { useToast } from '@/components/ui/use-toast'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { AlertCircle,CircleArrowOutUpLeftIcon } from 'lucide-react'
+import { AlertCircle, CircleArrowOutUpLeftIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { signIn } from 'next-auth/react'
+import { getSession, signIn } from 'next-auth/react'
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const {toast}=useToast()
+  const { toast } = useToast()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error] = useState<string|undefined|null>('')
+  const [error,setError] = useState<string | undefined | null>('')
   const router = useRouter()
 
 
-    // const router = useRouter(); // Get the router instance
-  
-    const handleLogin = async (event: React.FormEvent) => {
-      event.preventDefault();
-      const form = event.target as HTMLFormElement;
-      const username = form.username.value;
-      const password = form.password.value;
-  
-      const res = await signIn("user-login", {
+  // const router = useRouter(); // Get the router instance
+
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    try {
+      const res = await signIn('user-login', {
         username,
         password,
-        redirect: true, 
-        callbackUrl: "/dashboard", 
+        redirect: false, // Disable automatic redirect
       });
-  
+
       if (res?.error) {
+        setError(res.error); // Set error state for alert
         toast({
-          title: "⚠️ Login Failed",
+          title: '⚠️ Login Failed',
           description: res.error as string,
-          variant: "destructive", 
-          duration: 2000, 
+          variant: 'destructive',
+          duration: 2000,
         });
       } else {
         toast({
-          title: "🎉 Login Successful!",
-          description: "You're all set! 🚀 Login to explore your dashboard.", 
-          duration: 1000, 
+          title: '🎉 Login Successful!',
+          description: "You're all set! 🚀 Login to explore your dashboard.",
+          duration: 1000,
         });
-        router.push(res?.url || "/dashboard"); 
+        const session = await getSession()
+        if (session?.user?.isAdmin) {
+          setTimeout(() => {
+            router.push('/ruler/dashboard'); 
+          }, 1000);
+        } else {
+          setTimeout(() => {
+            router.push('/dashboard'); 
+          }, 1000);
+        }
       }
+    } catch (err) {
+      toast({
+        title: '⚠️ Unexpected Error',
+        description: 'Something went wrong. Please try again later.',
+        variant: 'destructive',
+        duration: 2000,
+      });
     }
+  };
 
   return (
     <div className="container mx-auto flex items-center justify-center min-h-screen">
@@ -97,9 +112,9 @@ export default function LoginPage() {
               Dont&apos; have an account?{' '}
             </span>
             <Link href='/register' className='ml-2'>
-         <CircleArrowOutUpLeftIcon
-         ></CircleArrowOutUpLeftIcon>
-           </Link>  </div>
+              <CircleArrowOutUpLeftIcon
+              ></CircleArrowOutUpLeftIcon>
+            </Link>  </div>
         </CardContent>
       </Card>
     </div>

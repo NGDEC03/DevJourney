@@ -23,11 +23,11 @@ export default function LoginPage() {
     e.preventDefault()
     // Here you would typically call an API to authenticate the user
     // For this example, we'll just simulate a successful login
-      const res = await signIn("user-login", {
+      const res = await signIn("admin-login", {
             username,
             password,
-            redirect: true, 
-            callbackUrl: "/dashboard", 
+            redirect: false, 
+            callbackUrl: "/ruler/dashboard", 
           });
       
           if (res?.error) {
@@ -43,7 +43,7 @@ export default function LoginPage() {
               description: "You're all set! 🚀 Login to explore your dashboard.", 
               duration: 1000, 
             });
-            router.push(res?.url || "/ruler/dashboard"); 
+            router.push( "/ruler/dashboard"); 
           }
   }
 

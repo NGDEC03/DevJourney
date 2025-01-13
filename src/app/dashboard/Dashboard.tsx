@@ -78,16 +78,16 @@ export default function DashboardPage() {
     )
   }
 
-  if (error) {
-    return (
-      <div className="w-screen h-screen flex flex-col items-center justify-center">
-        <Image src={Ghost} alt='error'/>
-        <p className="text-2xl font-bold text-zinc-700 mb-4">Error</p>
-        <p className="text-lg text-gray-800">{error}</p>
+  // if (error) {
+  //   return (
+  //     <div className="w-screen h-screen flex flex-col items-center justify-center">
+  //       <Image src={Ghost} alt='error'/>
+  //       <p className="text-2xl font-bold text-zinc-700 mb-4">Error</p>
+  //       <p className="text-lg text-gray-800">{error}</p>
        
-      </div>
-    )
-  }
+  //     </div>
+  //   )
+  // }
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Welcome back, {session?.user?.Name || "Coder"}!</h1>

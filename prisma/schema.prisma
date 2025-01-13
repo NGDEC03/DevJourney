@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "mongodb"
+  url      = env("DB_URL")
 }
 
 model User {
-  userName         String       @id @unique
+  userName         String       @id @map("_id") // Use MongoDB ObjectId as the primary key
   email            String       @unique
   name             String?
   password         String
@@ -23,11 +23,11 @@ model User {
   ranking          Int?
   learningProgress Float?
   isAdmin          Boolean?
-  @@index([email])
+
 }
 
 model Problem {
-  problemId          Int      @id @default(autoincrement())
+  problemId          String   @id @map("_id") // Use String for custom problem ID
   problemName        String
   problemDescription String
   difficulty         String
@@ -47,17 +47,17 @@ model Problem {
 }
 
 model Case {
-  caseId      Int     @id @default(autoincrement())
+  caseId      String  @id @map("_id") // Use String for custom case ID
   input       String
   output      String
   explanation String?
 
-  problemId Int
+  problemId String
   problem   Problem @relation(fields: [problemId], references: [problemId])
 }
 
 model Submission {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @map("_id") // Use String for custom submission ID
   status      String
   language    String
   runtime     String?
@@ -65,7 +65,7 @@ model Submission {
   submittedAt DateTime @default(now())
 
   userId    String
-  problemId Int
+  problemId String
 
   user    User    @relation(fields: [userId], references: [userName])
   problem Problem @relation(fields: [problemId], references: [problemId])

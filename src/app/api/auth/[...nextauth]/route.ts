@@ -43,59 +43,25 @@ const authOptions = {
                     userName: user.userName,
                     Name: user.name,
                     Email: user.email,
+                    isAdmin:user.isAdmin,
                     avatar: user.avatar || "default-avatar",
                 };
             },
         }),
-        CredentialsProvider({
-            name: "Admin Credentials",
-            id:"admin-login",
-            credentials: {
-                username: { label: "Admin Username", type: "text" },
-                password: { label: "Admin Password", type: "password" },
-            },
-            async authorize(credentials) {
-                if (!credentials?.username || !credentials.password) {
-                    throw new Error("Invalid credentials");
-                }
-
-                const admin = await prisma.user.findUnique({
-                    where: {
-                        userName: credentials.username,
-                    },
-                });
-
-                if (!admin || admin.role !== "admin") { // Ensure the user is an admin
-                    throw new Error("No admin found or unauthorized access");
-                }
-
-                const valid = await bcrypt.compare(credentials.password, admin.password);
-                if (!valid) {
-                    throw new Error("Invalid password");
-                }
-
-                return {
-                    id: '212',
-                    userName: admin.userName,
-                    Name: admin.name,
-                    Email: admin.email,
-                    avatar: admin.avatar || "default-avatar",
-                    role: admin.role,
-                };
-            },
-        }),
+        
     ],
-    pages: {
-        signIn: "/login",
-    },
+pages:{
+    error:"/error"
+},
     secret: process.env.SECRET || "default",
     callbacks: {
-        async jwt({ token, user }: { token: JWT; user: User | undefined }) {
+        async jwt({ token, user }: { token: any; user: User | undefined }) {
             if (user) {
                 token.id = user.id;
                 token.userName = user.userName;
                 token.Name = user.Name;
                 token.Email = user.Email;
+                token.isAdmin=user.isAdmin;
                 token.avatar = user.avatar || "default-avatar";
             }
             return token;
@@ -106,6 +72,7 @@ const authOptions = {
                 session.user.userName = token.userName;
                 session.user.Name = token.Name;
                 session.user.Email = token.Email;
+                session.user.isAdmin=token.isAdmin;
                 session.user.avatar = token.avatar;
             }
             return session;

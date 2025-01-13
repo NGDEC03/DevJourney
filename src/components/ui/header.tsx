@@ -5,20 +5,42 @@ import Link from "next/link";
 import { Button } from "./button";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useToast } from "./use-toast";
 
 export default function Header() {
   const router = useRouter();
+  const { toast } = useToast();
   const { data: session, status } = useSession();
 
   // Check if the session is loading or not authenticated
   const isLoggedIn = status === "authenticated";
-  const isLoading = status === "loading";  // Add loading check
+  const isLoading = status === "loading";
 
   if (isLoading) {
-    return (
-      <></>
-    );
+    return <></>;
   }
+
+  const handleLogout = async () => {
+    try {
+      toast({
+        title: "👋 Logout Successful!",
+        description: "You've been logged out. See you soon! 👌",
+        duration: 2000, // Show toast for 2 seconds
+      });
+      
+      // Delay redirection to ensure toast is visible
+      setTimeout(() => {
+        signOut({ callbackUrl: "/login" }); 
+      }, 2000); 
+    } catch (error) {
+      toast({
+        title: "⚠️ Error Logging Out",
+        description: "Something went wrong. Please try again later.",
+        duration: 2000,
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <header className="px-4 lg:px-6 h-14 flex items-center">
@@ -72,7 +94,7 @@ export default function Header() {
 
       {/* Authentication buttons */}
       {isLoggedIn ? (
-        <Button variant="ghost" className="ml-4" onClick={() => signOut()}>
+        <Button variant="ghost" className="ml-4" onClick={handleLogout}>
           <LogOut className="h-4 w-4 mr-2" />
           Logout
         </Button>
