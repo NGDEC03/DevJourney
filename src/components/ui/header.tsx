@@ -4,11 +4,12 @@ import React from "react";
 import Link from "next/link";
 import { Button } from "./button";
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useToast } from "./use-toast";
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
   const { data: session, status } = useSession();
 
@@ -27,11 +28,11 @@ export default function Header() {
         description: "You've been logged out. See you soon! 👌",
         duration: 2000, // Show toast for 2 seconds
       });
-      
+
       // Delay redirection to ensure toast is visible
       setTimeout(() => {
-        signOut({ callbackUrl: "/login" }); 
-      }, 2000); 
+        signOut({ callbackUrl: "/login" });
+      }, 2000);
     } catch (error) {
       toast({
         title: "⚠️ Error Logging Out",
@@ -42,6 +43,8 @@ export default function Header() {
     }
   };
 
+  const isAdminDashboard = pathname === "/ruler/dashboard";
+
   return (
     <header className="px-4 lg:px-6 h-14 flex items-center">
       {/* Logo and branding */}
@@ -49,39 +52,42 @@ export default function Header() {
         <Code2 className="h-6 w-6" />
         <span className="ml-2 text-lg font-bold">DevJourney</span>
       </Link>
-
-      {/* Navigation links */}
       <nav className="ml-auto flex gap-4 sm:gap-6">
-        <Link
-          className="text-sm font-medium hover:underline underline-offset-4"
-          href="/problems"
-        >
-          Problems
-        </Link>
-        <Link
-          className="text-sm font-medium hover:underline underline-offset-4"
-          href="/learn"
-        >
-          Learn
-        </Link>
-        <Link
-          className="text-sm font-medium hover:underline underline-offset-4"
-          href="/compete"
-        >
-          Compete
-        </Link>
-        <Link
-          className="text-sm font-medium hover:underline underline-offset-4"
-          href="/challenge"
-        >
-          Challenge
-        </Link>
-        <Link
-          className="text-sm font-medium hover:underline underline-offset-4"
-          href="/jobs"
-        >
-          Jobs
-        </Link>
+        {/* Conditional navigation links */}
+        {!isAdminDashboard  && (
+          <>
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
+              href="/problems"
+            >
+              Problems
+            </Link>
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
+              href="/learn"
+            >
+              Learn
+            </Link>
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
+              href="/compete"
+            >
+              Compete
+            </Link>
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
+              href="/challenge"
+            >
+              Challenge
+            </Link>
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
+              href="/jobs"
+            >
+              Jobs
+            </Link>
+          </>
+        )}
         {isLoggedIn && (
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"

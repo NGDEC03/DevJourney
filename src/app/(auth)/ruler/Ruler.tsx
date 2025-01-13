@@ -21,9 +21,8 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     const {toast}=useToast()
     e.preventDefault()
-    // Here you would typically call an API to authenticate the user
-    // For this example, we'll just simulate a successful login
-      const res = await signIn("admin-login", {
+
+      const res = await signIn("user-login", {
             username,
             password,
             redirect: false, 
