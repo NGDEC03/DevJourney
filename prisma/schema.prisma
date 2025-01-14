@@ -41,6 +41,7 @@ model Problem {
   userName    String?
   user        User?        @relation("UserProblems", fields: [userName], references: [userName])
   testCases   Case[]
+  constraint String[]
   submissions Submission[]
 
   @@index([problemName])
