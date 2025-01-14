@@ -6,12 +6,10 @@ export async function POST(req: NextRequest) {
         let { problemId, count } = await req.json();
         // console.log(problemId, count);
         let data = await prisma.case.findMany({
-            where: { problemId: problemId }
+            where: { problemId: problemId },
+            take:count
         })
-        count = count !== undefined ? count : data.length;
-        data = data.slice(0, count);
-        // console.log(data.length);
-        
+  
 
         return NextResponse.json({ status: "success", data: data });
         

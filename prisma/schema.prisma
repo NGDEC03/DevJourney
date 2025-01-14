@@ -23,7 +23,6 @@ model User {
   ranking          Int?
   learningProgress Float?
   isAdmin          Boolean?
-
 }
 
 model Problem {
@@ -33,7 +32,7 @@ model Problem {
   difficulty         String
   attemptCount       Int      @default(0)
   successCount       Int      @default(0)
-  timeLimit          Int
+  timeLimit          Int     
   memoryLimit        Int
   tags               String[]
   createdAt          DateTime @default(now())
@@ -41,7 +40,7 @@ model Problem {
   userName    String?
   user        User?        @relation("UserProblems", fields: [userName], references: [userName])
   testCases   Case[]
-  constraint String[]
+  constraint  String[]
   submissions Submission[]
 
   @@index([problemName])
@@ -52,18 +51,21 @@ model Case {
   input       String
   output      String
   explanation String?
+  timeLimit   Int      
 
   problemId String
   problem   Problem @relation(fields: [problemId], references: [problemId])
 }
 
 model Submission {
-  id          String   @id @map("_id") @default(auto()) @db.ObjectId
-  status      String
-  language    String
-  runtime     String?
-  memory      String?
-  submittedAt DateTime @default(now())
+  id                String   @id @map("_id") @default(auto()) @db.ObjectId
+  status            String
+  language          String
+  runtime           String?
+  memory            String?
+  submittedAt       DateTime @default(now())
+  failedTestCaseId  String?  
+  failureReason     String?  
 
   userId    String
   problemId String

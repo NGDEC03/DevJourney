@@ -8,6 +8,45 @@ interface LangInt {
     name: string;
 }
 
+
+const calculateStreak = async (userName:string) => {
+    const user = await prisma.user.findUnique({
+        where: { userName },
+        include: {
+            submissions: {
+                orderBy: { submittedAt: "desc" },
+            },
+        },
+    });
+
+    if (!user || user.submissions.length === 0) {
+        return 0; 
+    }
+
+    let streak = 0; 
+    const today = new Date();
+    let lastStreakDate = today;
+
+    for (const submission of user.submissions) {
+        const submissionDate = new Date(submission.submittedAt);
+
+        if (isSameDay(submissionDate, lastStreakDate)) {
+            
+            streak++;
+        } else if (isSameDay(submissionDate, subDays(lastStreakDate, 1))) {
+
+            streak++;
+            lastStreakDate = subDays(lastStreakDate, 1);
+        } else {
+            
+            break;
+        }
+    }
+
+    return streak;
+};
+
+
 const getLanguageId = async (language: string): Promise<number | null> => {
     try {
         const response = await axios.get("https://judge029.p.rapidapi.com/languages", {
@@ -55,7 +94,6 @@ const submitCode = async (
             stdout: response.data.stdout,
             timeTaken: response.data.time,
             memoryUsage: response.data.memory,
-            expected: testCase.output,
         };
     } catch {
         return { testCaseId: testCase.caseId, status: "Error" };
@@ -65,93 +103,93 @@ const submitCode = async (
 export async function POST(req: NextRequest) {
     try {
         const { problemId, language, code, userName } = await req.json();
-        console.log(problemId, language, code, userName);
+
+        if (!problemId || !language || !code || !userName) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
         const problem = await prisma.problem.findUnique({
-            where: { problemId: problemId },
+            where: { problemId },
             include: { testCases: true },
         });
-        
 
-        if (!problem) return NextResponse.json({ error: "Problem not found" }, { status: 404 });
+        if (!problem) {
+            return NextResponse.json({ error: "Problem not found" }, { status: 404 });
+        }
+        console.log(problem);
 
         const languageId = await getLanguageId(language);
-        if (!languageId) return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
+        if (!languageId) {
+            return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
+        }
 
-        console.log(problem, languageId);
-        const results = await Promise.all(
-            problem.testCases.map((testCase) =>
-                submitCode(code, languageId, testCase)
-            )
-        );
-        console.log(results);
+        const results: any[] = [];
+        let abortDueToTLE = false;
+
+
+
+
+        for (const testCase of problem.testCases) {
+            if (abortDueToTLE) break;
+
+            const { input, output, caseId, timeLimit } = testCase;
+            const result = await submitCode(code, languageId, {
+                input,
+                output,
+                caseId,
+            });
+
+            // Check for TLE
+            if (result.status.description === "Time Limit Exceeded") {
+                abortDueToTLE = true;
+            }
+
+            results.push(result);
+        }
 
         const allPassed = results.every((result) => result.status === "Accepted");
         const overallStatus = allPassed ? "Accepted" : "Failed";
 
-        const submission = await prisma.submission.create({
-            data: {
-                userId: userName,
-                problemId: problem.problemId,
-                status: overallStatus,
-                language,
-                runtime: results[0]?.timeTaken || null,
-                memory: results[0]?.memoryUsage || null,
-            },
-        });
+        const streak = await calculateStreak(userName);
 
-        await prisma.problem.update({
-            where: { problemId: problem.problemId },
-            data: {
-                attemptCount: { increment: 1 },
-                ...(allPassed && { successCount: { increment: 1 } }),
-                ...(allPassed && { user: { connect: { userName } } })
-            },
-        });
-        const user = await prisma.user.findUnique({
-            where: { userName },
-            include: {
-                submissions: true
-            }
-        })
+        await prisma.$transaction([
+            prisma.submission.create({
+                data: {
+                    userId: userName,
+                    problemId: problem.problemId,
+                    status: overallStatus,
+                    language,
+                    runtime: results[0]?.timeTaken || null,
+                    memory: results[0]?.memoryUsage || null,
+                },
+            }),
+            prisma.problem.update({
+                where: { problemId: problem.problemId },
+                data: {
+                    attemptCount: { increment: 1 },
+                    ...(allPassed && { successCount: { increment: 1 } }),
+                },
+            }),
+            prisma.user.update({
+                where: { userName },
+                data: {
+                    ...(allPassed && { streak }),
+                },
+            }),
+        ]);
 
-        const lastSubmissionDate = user.submissions[user.submissions.length - 1].submittedAt
-        const today = new Date()
-        let streak = 1
-        const yesterday = subDays(today, 1)
-        if (lastSubmissionDate) {
-            const lastDate = new Date(lastSubmissionDate)
-            if (isSameDay(lastDate, yesterday)) {
-                streak = (user.streak || 0) + 1
-
-            }
-        }
-        await prisma.user.update({
-            where: {
-                userName
-            },
-            data: {
-                ...(allPassed && {
-                    streak
-                })
-            }
-        })
-
-        await prisma.submission.update({
-            where: { id: submission.id },
-            data: {
-                problem: { connect: { problemId } },
-                user: { connect: { userName } }
-            }
-        })
-
-        console.log("here")
-        console.log(allPassed)
-        return NextResponse.json({
+        const failedTestCase = results.find((result) => result.status !== "Accepted");
+        const response = {
             status: overallStatus,
             results,
-            submissionId: submission.id,
-        });
-    } catch {
+            ...(failedTestCase && {
+                error: `Test case ${failedTestCase.testCaseId} failed: ${failedTestCase.status}`,
+            }),
+        };
+
+        return NextResponse.json(response);
+    } catch (error) {
+        console.error("Error in submission:", error);
         return NextResponse.json({ error: "An internal error occurred" }, { status: 500 });
     }
 }
