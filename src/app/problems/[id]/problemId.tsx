@@ -54,6 +54,8 @@ export default function ProblemPage({ id1 }: any ) {
         const fetchData = async() => {
             try {
                 const data = await fetchProblem(id1.id);
+                data.examples = (data.testCases).slice(0, 3);
+                // console.log(data);
                 setProblemData(data);
             } catch(error) {
                 console.error("Error fetching problem data");
@@ -107,7 +109,7 @@ export default function ProblemPage({ id1 }: any ) {
                             </div>
 
 
-                            {/* <Separator className='my-4'></Separator>
+                            <Separator className='my-4'></Separator>
                             {problemData.examples.map((example, index) => (
                                 <div key={index} className="mb-4">
                                     <p className="font-semibold">Example {index + 1}:</p>
@@ -116,11 +118,11 @@ export default function ProblemPage({ id1 }: any ) {
                                     <p><strong>Explanation:</strong> {example.explanation}</p>
                                     {index < problemData.examples.length - 1 && <Separator className="my-2" />}
                                 </div>
-                            ))} */}
+                            ))}
 
                             <Separator className='my-4'></Separator>
-                            {/* <CardTitle className='mb-4'>Constraints</CardTitle>
-                            <ol className="list-disc list-inside">
+                            <CardTitle className='mb-4'>Constraints</CardTitle>
+                            {/* <ol className="list-disc list-inside">
                                 {problemData.constraints.map((constraint, index) => (
                                     <li key={index}>{constraint}</li>
                                 ))}
