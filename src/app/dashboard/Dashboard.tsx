@@ -18,10 +18,7 @@ const LazyPieChart = dynamic(() => import('@/components/ui/pieChart'), { ssr: fa
 
 export default function DashboardPage() {
   const { data: session } = useSession()
-  const [userStats, setUserStats] = useState(null)
-  const [recentProblems, setRecentProblems] = useState([])
-  const [problemDistribution, setProblemDistribution] = useState([])
-  const [submissions, setSubmissions] = useState([])
+  const [dashboardData, setDashboardData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string|null>(null)
 
@@ -38,22 +35,9 @@ export default function DashboardPage() {
         setError(null)
 
         try {
-          const [
-            statsResponse,
-            problemsResponse,
-            distributionResponse,
-            submissionsResponse,
-          ] = await Promise.all([
-            axios.get(`/api/user-stats?userName=${session.user.userName}`),
-            axios.get(`/api/recent-problems?userName=${session.user.userName}`),
-            axios.get(`/api/problem-distribution?userName=${session.user.userName}`),
-            axios.get(`/api/recent-submissions?userName=${session.user.userName}`),
-          ])
+          const response = await axios.get(`/api/user-stats?userName=${session.user.userName}`)
 
-          setUserStats(statsResponse.data)
-          setRecentProblems(problemsResponse.data)
-          setProblemDistribution(distributionResponse.data)
-          setSubmissions(submissionsResponse.data)
+          setDashboardData(response.data)
         } catch (err) {
           console.error('Error fetching dashboard data:', err)
           setError('Failed to load dashboard data. Please try again later.')
@@ -80,6 +64,8 @@ export default function DashboardPage() {
     )
   }
 
+  const { userStats, recentProblems, problemDistribution, recentSubmissions } = dashboardData || {}
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Welcome back, {session?.user?.Name || "Coder"}!</h1>
@@ -92,7 +78,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="overflow-x-auto">
-        <SubmissionsHistory submissions={submissions} />
+        <SubmissionsHistory submissions={recentSubmissions} />
       </div>
     </div>
   )

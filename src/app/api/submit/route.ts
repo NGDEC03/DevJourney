@@ -67,7 +67,7 @@ const getLanguageId = async (language: string): Promise<number | null> => {
 const submitCode = async (
     code: string,
     languageId: number,
-    testCase: { input: string; output: string; caseId: string }
+    testCase: { input: string; output: string; caseId: string;timeLimit:number;memoryLimit:number }
 ) => {
     try {
         const response = await axios.post(
@@ -76,6 +76,8 @@ const submitCode = async (
                 source_code: code,
                 language_id: languageId,
                 stdin: testCase.input,
+                cpu_time_limit:testCase.timeLimit,
+                memory_limit:testCase.memoryLimit,
                 expected_output: testCase.output,
             },
             {
@@ -107,16 +109,17 @@ export async function POST(req: NextRequest) {
         if (!problemId || !language || !code || !userName) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
+// console.log(problemId,language,code,userName);
 
         const problem = await prisma.problem.findUnique({
             where: { problemId },
             include: { testCases: true },
         });
-
+        // console.log(problem);
+        
         if (!problem) {
             return NextResponse.json({ error: "Problem not found" }, { status: 404 });
         }
-        console.log(problem);
 
         const languageId = await getLanguageId(language);
         if (!languageId) {
@@ -132,10 +135,12 @@ export async function POST(req: NextRequest) {
         for (const testCase of problem.testCases) {
             if (abortDueToTLE) break;
 
-            const { input, output, caseId, timeLimit } = testCase;
+            const { input, output, caseId, timeLimit,memoryLimit } = testCase;
             const result = await submitCode(code, languageId, {
                 input,
                 output,
+                timeLimit,
+                memoryLimit,
                 caseId,
             });
 

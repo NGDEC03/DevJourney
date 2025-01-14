@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
-        const problemId = searchParams.get("problem_Id") || "";
+        const problemId = searchParams.get("problem_Id") || "67853a1d15827bfa11f500d7";
+console.log(problemId);
 
         const problem = await prisma.problem.findUnique({
             where: {

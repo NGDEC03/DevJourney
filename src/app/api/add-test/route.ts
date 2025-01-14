@@ -3,13 +3,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
-        const { input, output, explaination, problemId } = await req.json();
-        console.log(input, output, explaination, problemId);
+        const { input, output, explaination, problemId,timeLimit,memoryLimit } = await req.json();
+        console.log(input, output, explaination, problemId,timeLimit,memoryLimit);
         await prisma.case.create({
             data: {
                 input: input,
                 output: output,
                 explanation: explaination,
+                timeLimit,
+                memoryLimit,
                 problem:{
                     connect:{
                         problemId

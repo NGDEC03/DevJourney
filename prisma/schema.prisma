@@ -31,8 +31,7 @@ model Problem {
   problemDescription String
   difficulty         String
   attemptCount       Int      @default(0)
-  successCount       Int      @default(0)
-  timeLimit          Int     
+  successCount       Int      @default(0)   
   memoryLimit        Int
   tags               String[]
   createdAt          DateTime @default(now())
@@ -43,7 +42,6 @@ model Problem {
   constraint  String[]
   submissions Submission[]
 
-  @@index([problemName])
 }
 
 model Case {
@@ -51,11 +49,12 @@ model Case {
   input       String
   output      String
   explanation String?
-  timeLimit   Int      
+  timeLimit   Float    
+  memoryLimit Float  
 
   problemId String
   problem   Problem @relation(fields: [problemId], references: [problemId])
-}
+} 
 
 model Submission {
   id                String   @id @map("_id") @default(auto()) @db.ObjectId
@@ -68,10 +67,9 @@ model Submission {
   failureReason     String?  
 
   userId    String
-  problemId String
+  problemId String @db.ObjectId
 
   user    User    @relation(fields: [userId], references: [userName])
   problem Problem @relation(fields: [problemId], references: [problemId])
 
-  @@index([userId, problemId])
 }
