@@ -10,7 +10,11 @@ export async function POST(req: NextRequest) {
                 input: input,
                 output: output,
                 explanation: explaination,
-                problemId: problemId,
+                problem:{
+                    connect:{
+                        problemId
+                    }
+                }
             }
         })
         return NextResponse.json({

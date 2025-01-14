@@ -3,7 +3,11 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        const problems = await prisma.problem.findMany()
+        const problems = await prisma.problem.findMany({
+            include:{
+               testCases:true
+            }
+        })
         return NextResponse.json({ problems })
     }
     catch (err) {
