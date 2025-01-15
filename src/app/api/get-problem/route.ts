@@ -22,7 +22,7 @@ console.log(problemId);
 
         return NextResponse.json(problem, { status: 200 });
     } catch (error) {
-        console.error("Error fetching problem:", error);
-        return NextResponse.json({ error: "An internal server error occurred" }, { status: 500 });
+        console.error("Error fetching problem:");
+        return NextResponse.json({ error: `An internal server error occurred \n${error}` }, { status: 500 });
     }
 }
