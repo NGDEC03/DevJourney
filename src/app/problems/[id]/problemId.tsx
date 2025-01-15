@@ -107,7 +107,7 @@ export default function ProblemPage({ id1 }: any ) {
 
 
                             <Separator className='my-4'></Separator>
-                            {problemData.examples.map((example, index) => (
+                            {problemData.examples.map((example: any, index: number) => (
                                 <div key={index} className="mb-4">
                                     <p className="font-semibold">Example {index + 1}:</p>
                                     <p><strong>Input:</strong> {example.input}</p>
@@ -120,7 +120,7 @@ export default function ProblemPage({ id1 }: any ) {
                             <Separator className='my-4'></Separator>
                             <CardTitle className='mb-4'>Constraints</CardTitle>
                             <ol className="list-disc list-inside">
-                                {problemData.constraint.map((constraint, index) => (
+                                {problemData.constraint.map((constraint: string, index: number) => (
                                     <li key={index}>{constraint}</li>
                                 ))}
                             </ol>
@@ -128,7 +128,7 @@ export default function ProblemPage({ id1 }: any ) {
                     </Card>
 
                     <div className="flex flex-wrap gap-2">
-                        {problemData.tags.map((tag, index) => (
+                        {problemData.tags.map((tag: string, index: number) => (
                             <Badge key={index} variant="outline">{tag}</Badge>
                         ))}
                     </div>
@@ -144,7 +144,7 @@ export default function ProblemPage({ id1 }: any ) {
                                 height="60vh"
                                 defaultLanguage="javascript"
                                 value={""}
-                                onChange={(value) => setCode(value || '')}
+                                onChange={(value: any) => setCode(value || '')}
                                 theme="vs-dark"
                                 options={{
                                     minimap: { enabled: false },
