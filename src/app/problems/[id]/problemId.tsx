@@ -42,9 +42,6 @@ async function fetchProblem(id1: string) {
     // console.log(problemData.data);
     return problemData.data;
 }
-async function fetchCases(id1: string) {
-    
-}
 
 export default function ProblemPage({ id1 }: any ) {
     const [problemData, setProblemData] = useState<any>(null);
@@ -122,11 +119,11 @@ export default function ProblemPage({ id1 }: any ) {
 
                             <Separator className='my-4'></Separator>
                             <CardTitle className='mb-4'>Constraints</CardTitle>
-                            {/* <ol className="list-disc list-inside">
-                                {problemData.constraints.map((constraint, index) => (
+                            <ol className="list-disc list-inside">
+                                {problemData.constraint.map((constraint, index) => (
                                     <li key={index}>{constraint}</li>
                                 ))}
-                            </ol> */}
+                            </ol>
                         </CardContent>
                     </Card>
 
