@@ -6,7 +6,7 @@ async function page({ params }: { params: Promise<string> }) {
 
 
     return (
-        <ProblemPage id1={id}></ProblemPage>
+        <ProblemPage id={id}></ProblemPage>
     )
 }
 

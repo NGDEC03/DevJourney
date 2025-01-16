@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import Editor from "@monaco-editor/react"
 import axios from 'axios'
 import { CheckCircle, Clock, BarChart2 } from 'lucide-react'
+import { SkeletonLoader } from '@/components/ui/skeletonLoader'
 // const problemData = {
 //     id: 1,
 //     title: "Two Sum",
@@ -37,20 +38,19 @@ import { CheckCircle, Clock, BarChart2 } from 'lucide-react'
 //     // Your code here
 // };`
 // }
-async function fetchProblem(id1: string) {
-    const problemData = await axios.get(`/api/get-problem?problem_Id=${id1}`);
-    // console.log(problemData.data);
+async function fetchProblem(id: string) {
+    const problemData = await axios.get(`/api/get-problem?problem_Id=${id}`);
     return problemData.data;
 }
 
-export default function ProblemPage({ id1 }: any ) {
+export default function ProblemPage({id}:{id:string}) {
     const [problemData, setProblemData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [code, setCode] = useState(null);
     useEffect(() => {
         const fetchData = async() => {
             try {
-                const data = await fetchProblem(id1.id);
+                const data = await fetchProblem(id);
                 data.examples = (data.testCases).slice(0, 3);
                 // console.log(data);
                 setProblemData(data);
@@ -61,9 +61,9 @@ export default function ProblemPage({ id1 }: any ) {
             }
         }
         fetchData();
-    }, [id1]);
+    }, [id]);
     if(loading) {
-        return <></>;
+        return <SkeletonLoader/>
     }
     
 
@@ -81,7 +81,7 @@ export default function ProblemPage({ id1 }: any ) {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <CardTitle className='text-2xl'>{problemData.problemName}</CardTitle>
-                                    <CardDescription >Problem #{id1.id}</CardDescription>
+                                    
                                 </div>
                                 <Badge className={problemData.difficulty === "Easy" ? "bg-green-600 text-green-100" : problemData.difficulty === "Medium" ? "bg-yellow-600 text-yellow-100" : "bg-red-600 text-red-100"}>
                                     {problemData.difficulty}

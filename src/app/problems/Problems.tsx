@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import axios, { all } from 'axios'
 import { useEffect, useState } from "react"
+import { SkeletonLoader } from "@/components/ui/skeletonLoader"
 
 export default function ProblemsPage() {
   const [problems, setProblems] = useState<any>(null);
@@ -44,7 +45,7 @@ export default function ProblemsPage() {
 
   if(loading) {
     return (
-      <>Loading....</>
+      <SkeletonLoader/>
     )
   }
   // console.log(problems)

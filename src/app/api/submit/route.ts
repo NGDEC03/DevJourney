@@ -89,6 +89,8 @@ const submitCode = async (
                 },
             }
         );
+        console.log(response);
+        
         return {
             testCaseId: testCase.caseId,
             status: response.data.status.description,
@@ -97,7 +99,7 @@ const submitCode = async (
             timeTaken: response.data.time,
             memoryUsage: response.data.memory,
         };
-    } catch {
+    } catch(err){
         return { testCaseId: testCase.caseId, status: "Error" };
     }
 };
@@ -122,15 +124,28 @@ export async function POST(req: NextRequest) {
         }
 
         const languageId = await getLanguageId(language);
+        console.log(languageId);
+        
         if (!languageId) {
             return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
         }
+
+
+
+// Elkos Signy Pen
+
+
 
         const results: any[] = [];
         let abortDueToTLE = false;
 
 
 
+// const t:any[]=[]
+// // t.push(problem.testCases[1])
+// t.push(problem.testCases[2])
+// console.log(t);
+console.log("entered");
 
         for (const testCase of problem.testCases) {
             if (abortDueToTLE) break;
@@ -143,6 +158,7 @@ export async function POST(req: NextRequest) {
                 memoryLimit,
                 caseId,
             });
+console.log(result);
 
             // Check for TLE
             if (result.status.description === "Time Limit Exceeded") {
@@ -151,13 +167,16 @@ export async function POST(req: NextRequest) {
 
             results.push(result);
         }
+        console.log("exited");
+        
 
         const allPassed = results.every((result) => result.status === "Accepted");
         const overallStatus = allPassed ? "Accepted" : "Failed";
+console.log(allPassed,overallStatus);
 
         const streak = await calculateStreak(userName);
 
-        await prisma.$transaction([
+        
             prisma.submission.create({
                 data: {
                     userId: userName,
@@ -167,22 +186,21 @@ export async function POST(req: NextRequest) {
                     runtime: results[0]?.timeTaken || null,
                     memory: results[0]?.memoryUsage || null,
                 },
-            }),
-            prisma.problem.update({
-                where: { problemId: problem.problemId },
-                data: {
-                    attemptCount: { increment: 1 },
-                    ...(allPassed && { successCount: { increment: 1 } }),
-                },
-            }),
-            prisma.user.update({
-                where: { userName },
-                data: {
-                    ...(allPassed && { streak }),
-                },
-            }),
-        ]);
-
+            })
+        //     prisma.problem.update({
+        //         where: { problemId: problem.problemId },
+        //         data: {
+        //             attemptCount: { increment: 1 },
+        //             ...(allPassed && { successCount: { increment: 1 } }),
+        //         },
+        //     }),
+        //     prisma.user.update({
+        //         where: { userName },
+        //         data: {
+        //             ...(allPassed && { streak }),
+        //         },
+        //     }),
+        
         const failedTestCase = results.find((result) => result.status !== "Accepted");
         const response = {
             status: overallStatus,
@@ -191,6 +209,7 @@ export async function POST(req: NextRequest) {
                 error: `Test case ${failedTestCase.testCaseId} failed: ${failedTestCase.status}`,
             }),
         };
+console.log(response);
 
         return NextResponse.json(response);
     } catch (error) {
