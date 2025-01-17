@@ -4,11 +4,22 @@ export async function GET(req:NextRequest){
     try {
          const {searchParams}=new URL(req.url)
          const caseId=searchParams.get("case_Id") || ""
-            await prisma.case.delete({
-                where:{
-                    caseId
+         await prisma.submission.create({
+            data:{
+                status:"Accepted",
+                language:"JavaScript",
+                problem:{
+                    connect:{
+                        problemId:"67853a1d15827bfa11f500d7"
+                    }
+                },
+                user:{
+                    connect:{
+                        userName:"phantom458"
+                    }
                 }
-    })
+            }
+         })
             return NextResponse.json({
                 status: "success",
             })

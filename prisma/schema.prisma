@@ -68,7 +68,7 @@ model Submission {
   failureReason     String?  
 
   userId    String
-  problemId String @db.ObjectId
+  problemId String 
 
   user    User    @relation(fields: [userId], references: [userName])
   problem Problem @relation(fields: [problemId], references: [problemId])
