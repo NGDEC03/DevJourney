@@ -8,6 +8,7 @@ export const getLanguageId = async (language: string): Promise<number | null> =>
                 "x-rapidapi-host": "judge029.p.rapidapi.com",
             },
         });
+        // console.log(response);
         const languageMatch = response.data.find((lang:any) =>
             lang.name.toLowerCase().includes(language.toLowerCase())
         );

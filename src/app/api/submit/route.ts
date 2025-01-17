@@ -10,6 +10,7 @@ import { getLanguageId } from "@/utils/getLanguageId";
 export async function POST(req: NextRequest) {
     try {
         const { problemId, language, code, userName } = await req.json();
+        // console.log(problemId, language, code, userName)
 
         if (!problemId || !language || !code || !userName) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
         }
 
         const languageId = await getLanguageId(language);
-        console.log(languageId);
+        // console.log(languageId);
 
         if (!languageId) {
             return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
@@ -46,10 +47,11 @@ export async function POST(req: NextRequest) {
         // // t.push(problem.testCases[1])
         // t.push(problem.testCases[2])
         // console.log(t);
-        console.log("entered");
+        // console.log("entered");
 
         for (const testCase of problem.testCases) {
             if (abortDueToTLE) break;
+            // console.log(testCase)
 
             const { input, output, caseId, timeLimit, memoryLimit } = testCase;
             const result = await submitCode(code, languageId, {
@@ -59,7 +61,7 @@ export async function POST(req: NextRequest) {
                 memoryLimit,
                 caseId,
             });
-            console.log(result);
+            // console.log(result);
 
             // Check for TLE
             if (result.status.description === "Time Limit Exceeded") {
@@ -68,7 +70,7 @@ export async function POST(req: NextRequest) {
 
             results.push(result);
         }
-        console.log("exited");
+        // console.log("exited");
 
 
         const allPassed = results.every((result) => result.status === "Accepted");
@@ -77,7 +79,7 @@ export async function POST(req: NextRequest) {
 
         const {streak} = await calculateStreak(userName,new Date());
 
-        console.log(streak+" "+problem.problemId+" "+userName);
+        // console.log(streak+" "+problem.problemId+" "+userName);
 
         await prisma.$transaction(async (prisma) => {
             await prisma.submission.create({
@@ -129,7 +131,7 @@ export async function POST(req: NextRequest) {
                 error: `Test case ${failedTestCase.testCaseId} failed: ${failedTestCase.status}`,
             }),
         };
-        console.log(response);
+        // console.log(response);
 
         return NextResponse.json(response);
     } catch (error) {
