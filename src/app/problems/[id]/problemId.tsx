@@ -13,9 +13,7 @@ import { SkeletonLoader } from '@/components/ui/skeletonLoader'
 import { languageOptions } from '@/utils/languageOptions'
 import { useSession } from 'next-auth/react'
 
-interface problem_id {
-    id: string;
-}
+
 interface problem {
     problemId: string;
     problemName: string;
@@ -49,7 +47,7 @@ async function fetchProblem(id: string) {
     return problemData.data
 }
 
-export default function ProblemPage({id}: {id: problem_id}) {
+export default function ProblemPage({id}: {id: string}) {
     // console.log(id);
     const { data: session } = useSession();
     const [problemData, setProblemData] = useState<any>(null)

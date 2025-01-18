@@ -1,57 +1,80 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Button } from "@/components/ui/button"
-import { signIn } from 'next-auth/react'
+import { useToast } from '@/components/ui/use-toast'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { AlertCircle,CircleArrowOutUpLeftIcon,PersonStanding } from 'lucide-react'
+import { AlertCircle, CircleArrowOutUpLeftIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { useToast } from '@/components/ui/use-toast'
+import { getSession, signIn } from 'next-auth/react'
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const { toast } = useToast()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [error,setError] = useState<string | undefined | null>('')
   const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    const {toast}=useToast()
-    e.preventDefault()
 
-      const res = await signIn("user-login", {
-            username,
-            password,
-            redirect: false, 
-            callbackUrl: "/ruler/dashboard", 
-          });
-      
-          if (res?.error) {
-            toast({
-              title: "⚠️ Login Failed",
-              description: res.error as string,
-              variant: "destructive", 
-              duration: 2000, 
-            });
-          } else {
-            toast({
-              title: "🎉 Login Successful!",
-              description: "You're all set! 🚀 Login to explore your dashboard.", 
-              duration: 1000, 
-            });
-            router.push( "/ruler/dashboard"); 
-          }
-  }
+  // const router = useRouter(); // Get the router instance
+
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    try {
+      const res = await signIn('user-login', {
+        username,
+        password,
+        redirect: false, 
+      });
+
+      if (res?.error) {
+        setError(res.error); 
+        toast({
+          title: '⚠️ Login Failed',
+          description: res.error as string,
+          variant: 'destructive',
+          duration: 2000,
+        });
+      } else {
+        toast({
+          title: '🎉 Login Successful!',
+          description: "You're all set! 🚀 Login to explore your dashboard.",
+          duration: 1000,
+        });
+        const session = await getSession()
+        if (session?.user?.isAdmin) {
+          setTimeout(() => {
+            router.push('/ruler/dashboard'); 
+          }, 1000);
+        } else {
+          setTimeout(() => {
+            router.push('/dashboard'); 
+          }, 1000);
+        }
+      }
+    } catch (err) {
+      toast({
+        title: '⚠️ Unexpected Error',
+        description: 'Something went wrong. Please try again later.',
+        variant: 'destructive',
+        duration: 2000,
+      });
+    }
+  };
 
   return (
     <div className="container mx-auto flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Login - Admin</CardTitle>
-          <CardDescription>Welcome back! Please login to your account</CardDescription>
+          <CardTitle className="text-center">Admin-Login</CardTitle>
+       
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">

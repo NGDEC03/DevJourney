@@ -114,13 +114,13 @@ export async function POST(req: NextRequest) {
                 },
             });
         
-            // Update user streak
             await prisma.user.update({
                 where: { userName },
                 data: {
                     ...(allPassed && { streak }),
                 },
             });
+            
         });
         
         const failedTestCase = results.find((result) => result.status !== "Accepted");

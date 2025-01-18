@@ -48,16 +48,6 @@ export default function LoginPage() {
           description: "You're all set! 🚀 Login to explore your dashboard.",
           duration: 1000,
         });
-        const session = await getSession()
-        if (session?.user?.isAdmin) {
-          setTimeout(() => {
-            router.push('/ruler/dashboard'); 
-          }, 1000);
-        } else {
-          setTimeout(() => {
-            router.push('/dashboard'); 
-          }, 1000);
-        }
       }
     } catch (err) {
       toast({

@@ -65,6 +65,7 @@ export default function DashboardPage() {
   }
 
   const { userStats, recentProblems, problemDistribution, recentSubmissions } = dashboardData || {}
+console.log(problemDistribution);
 
   return (
     <div className="container mx-auto px-4 py-8">
