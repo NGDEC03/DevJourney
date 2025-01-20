@@ -31,7 +31,8 @@ export default function LoginPage() {
       const res = await signIn('user-login', {
         username,
         password,
-        redirect: false, // Disable automatic redirect
+        callbackUrl: "/dashboard",
+        redirect: true, // Disable automatic redirect
       });
 
       if (res?.error) {

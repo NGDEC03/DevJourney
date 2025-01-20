@@ -6,11 +6,17 @@ import { Input } from "@/components/ui/input"
 import { useSession } from "next-auth/react"
 import { Code2, GraduationCap, Users, Github, Loader2 } from 'lucide-react'
 import Image from "next/image"
+import { use, useEffect } from "react"
+import { useRouter } from "next/navigation"
+
 
 export default function LandingPage() {
   
-  
+  const router = useRouter();
   const {data:session,status}=useSession({required:false})
+  useEffect(() => {
+    router.push("/");
+  }, [status, router]);
   const isLoggedIn = status === "authenticated";
   if (status==="loading") {
     return (
@@ -29,6 +35,7 @@ export default function LandingPage() {
       </div>
     </div>)
   }
+
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">
