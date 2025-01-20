@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from '@/components/ui/use-toast'
+import { TagSelector } from '@/components/TagSelector'
+import axios from 'axios'
 
 interface ProblemFormData {
   problemName: string;
@@ -18,7 +20,7 @@ interface ProblemFormData {
   difficulty: 'Easy' | 'Medium' | 'Hard';
   timeLimit: number;
   memoryLimit: number;
-  tags: string;
+  tags: string[];
 }
 
 interface TestCaseFormData {
@@ -37,7 +39,9 @@ const mockUsers = [
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("add-problem")
-  const toast = useToast()
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>("Easy")
+  const { toast } = useToast()
 
   const { register: registerProblem, handleSubmit: handleSubmitProblem, formState: { errors: problemErrors } } = useForm<ProblemFormData>()
 
@@ -45,19 +49,27 @@ export default function AdminDashboard() {
 
   const onSubmitProblem: SubmitHandler<ProblemFormData> = async (data) => {
     try {
-      // Replace with actual API call
-      console.log("Submitting problem:", data)
+      data.difficulty = difficulty
+      data.tags = selectedTags
+      const response = await axios.post(`/api/add-problem`, {
+        problemD: data.problemD,
+        problemName: data.problemName,
+        memoryLimit: data.memoryLimit,
+        timeLimit: data.timeLimit,
+        difficulty: data.difficulty,
+        tags: data.tags,
+      })
       toast({
         title: 'Success',
         description: 'Problem added successfully!',
         variant: 'default',
-      })
+      });
     } catch (error) {
       toast({
         title: '⚠️ Unexpected Error',
         description: 'Failed to add problem. Please try again.',
         variant: 'destructive',
-      })
+      });
     }
   }
 
@@ -69,13 +81,13 @@ export default function AdminDashboard() {
         title: 'Success',
         description: 'Test case added successfully!',
         variant: 'default',
-      })
+      });
     } catch (error) {
       toast({
         title: '⚠️ Unexpected Error',
         description: 'Failed to add test case. Please try again.',
         variant: 'destructive',
-      })
+      });
     }
   }
 
@@ -108,7 +120,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="difficulty">Difficulty</Label>
-                  <Select onValueChange={(value) => registerProblem("difficulty").onChange(value)}>
+                  <Select onValueChange={(value: 'Easy' | 'Medium' | 'Hard') => setDifficulty(value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select difficulty" />
                     </SelectTrigger>
@@ -132,7 +144,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="tags">Tags (comma-separated)</Label>
-                  <Input id="tags" {...registerProblem("tags", { required: "At least one tag is required" })} />
+                  <TagSelector selectedTags={selectedTags} onTagsChange={setSelectedTags} />
                   {problemErrors.tags && <p className="text-red-500">{problemErrors.tags.message}</p>}
                 </div>
                 <Button type="submit">Add Problem</Button>
