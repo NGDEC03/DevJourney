@@ -53,7 +53,9 @@ export async function POST(req: NextRequest) {
             if (abortDueToTLE) break;
             // console.log(testCase)
 
-            const { input, output, caseId, timeLimit, memoryLimit } = testCase;
+            const { input, output, caseId } = testCase;
+            const timeLimit = problem.timeLimit;
+            const memoryLimit = problem.memoryLimit;
             const result = await submitCode(code, languageId, {
                 input,
                 output,

@@ -50,8 +50,6 @@ model Case {
   input       String
   output      String
   explanation String?
-  timeLimit   Float    
-  memoryLimit Float  
 
   problemId String
   problem   Problem @relation(fields: [problemId], references: [problemId])

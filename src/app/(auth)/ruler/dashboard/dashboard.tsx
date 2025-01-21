@@ -76,7 +76,13 @@ export default function AdminDashboard() {
   const onSubmitTestCase: SubmitHandler<TestCaseFormData> = async (data) => {
     try {
       // Replace with actual API call
-      console.log("Submitting test case:", data)
+      // console.log("Submitting test case:", data)
+      const response = await axios.post(`/api/add-test/`, {
+        input: data.input,
+        output: data.output,
+        explaination: data.explanation,
+        problemId: data.problemId,
+      })
       toast({
         title: 'Success',
         description: 'Test case added successfully!',
@@ -162,7 +168,7 @@ export default function AdminDashboard() {
               <form onSubmit={handleSubmitTestCase(onSubmitTestCase)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="problemId">Problem ID</Label>
-                  <Input id="problemId" type="number" {...registerTestCase("problemId", { required: "Problem ID is required", min: { value: 1, message: "Problem ID must be at least 1" } })} />
+                  <Input id="problemId" type="text" {...registerTestCase("problemId", { required: "Problem ID is required", min: { value: 1, message: "Problem ID must be at least 1" } })} />
                   {testCaseErrors.problemId && <p className="text-red-500">{testCaseErrors.problemId.message}</p>}
                 </div>
                 <div className="space-y-2">
