@@ -3,10 +3,12 @@ import ProblemPage from './problemId'
 
 async function page({ params }: { params: Promise<string> }) {
     const id=await params
-
+    const problem_id={
+        id:id
+    }
 
     return (
-        <ProblemPage id={id}></ProblemPage>
+        <ProblemPage id={problem_id}></ProblemPage>
     )
 }
 

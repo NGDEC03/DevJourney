@@ -30,6 +30,14 @@ interface problem {
     testCases: testCase[];
     examples?: testCase[];
 }
+interface User {
+    id: string;
+    userName: string;
+    Name: string;
+    Email: string;
+    avatar: string;
+    isAdmin: boolean;
+}
 interface testCase {
     caseId: string;
     input: string;
@@ -42,47 +50,47 @@ interface testCase {
 interface problem_id {
     id: string;
 }
-
 async function fetchProblem(id: string) {
     // console.log(id);
-    
+
     const problemData = await axios.get(`/api/get-problem?problem_Id=${id}`)
     return problemData.data
 }
 
-export default function ProblemPage({id}: {id: problem_id}) {
-    // console.log(id);
+export default function ProblemPage({ id }: { id: problem_id }) {
+   id=id.id.id
     const { data: session } = useSession();
+    const user = session?.user as User
     const [problemData, setProblemData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [code, setCode] = useState('')
     const [language, setLanguage] = useState('javascript')
 
     useEffect(() => {
-        const fetchData = async() => {
+        const fetchData = async () => {
             try {
-                const data = await fetchProblem(id.id) as problem;
+                const data = await fetchProblem(id) as problem;
                 data.examples = (data.testCases).slice(0, 3)
                 setProblemData(data)
                 // setCode(getDefaultCode(language))
-            } catch(error) {
+            } catch (error) {
                 console.error("Error fetching problem data", error)
             } finally {
                 setLoading(false)
             }
         }
         fetchData()
-    }, [id.id])
+    }, [id])
 
     useEffect(() => {
         // console.log(language);
     }, [language])
 
-    if(loading) {
+    if (loading) {
         return <SkeletonLoader />
     }
 
-    const handleSubmit = async() => {
+    const handleSubmit = async () => {
         // console.log({ 
         //     problemId: id.id, 
         //     language, 
@@ -91,10 +99,10 @@ export default function ProblemPage({id}: {id: problem_id}) {
         // });
         try {
             const response = await axios.post(`/api/submit`, {
-                problemId: id.id,
+                problemId: id,
                 language: language,
                 code: code,
-                userName: session?.user?.userName,
+                userName: user.userName,
             })
             console.log(response);
         } catch (error) {
@@ -113,11 +121,10 @@ export default function ProblemPage({id}: {id: problem_id}) {
                                     <CardTitle className="text-3xl font-bold">{problemData.problemName}</CardTitle>
                                     {/* <CardDescription className="mt-2">Problem #{id.id}</CardDescription> */}
                                 </div>
-                                <Badge className={`text-sm font-semibold px-3 py-1 rounded-full ${
-                                    problemData.difficulty === "Easy" ? "bg-green-100 text-green-800" :
+                                <Badge className={`text-sm font-semibold px-3 py-1 rounded-full ${problemData.difficulty === "Easy" ? "bg-green-100 text-green-800" :
                                     problemData.difficulty === "Medium" ? "bg-yellow-100 text-yellow-800" :
-                                    "bg-red-100 text-red-800"
-                                }`}>
+                                        "bg-red-100 text-red-800"
+                                    }`}>
                                     {problemData.difficulty}
                                 </Badge>
                             </div>
@@ -127,7 +134,7 @@ export default function ProblemPage({id}: {id: problem_id}) {
                             <div className="flex items-center space-x-6 mb-6">
                                 <div className="flex items-center">
                                     <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
-                                    <span className="text-sm font-medium">{((problemData.successCount/problemData.attemptCount)*100).toFixed(1)}% Success</span>
+                                    <span className="text-sm font-medium">{((problemData.successCount / problemData.attemptCount) * 100).toFixed(1)}% Success</span>
                                 </div>
                                 <div className="flex items-center">
                                     <Clock className="h-5 w-5 mr-2 text-yellow-500" />
@@ -140,7 +147,7 @@ export default function ProblemPage({id}: {id: problem_id}) {
                             </div>
 
                             <Separator className="my-6" />
-                            
+
                             <div className="space-y-6">
                                 <h3 className="text-xl font-semibold">Examples</h3>
                                 {problemData.examples.map((example: any, index: number) => (
@@ -154,7 +161,7 @@ export default function ProblemPage({id}: {id: problem_id}) {
                             </div>
 
                             <Separator className="my-6" />
-                            
+
                             <div>
                                 <h3 className="text-xl font-semibold mb-4">Constraints</h3>
                                 <ul className="list-disc list-inside space-y-2">

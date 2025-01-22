@@ -1,8 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { UserStats } from "@/types/type";
 import { CheckCircle, BarChart, Trophy, BookOpen } from 'lucide-react'
+interface UserStat{
+  userStats:UserStats
+}
 
-export default function UserStatsCards({ userStats }) {
+export default function UserStatsCards({ userStats }:UserStat) {
     console.log(userStats);
     
   return (

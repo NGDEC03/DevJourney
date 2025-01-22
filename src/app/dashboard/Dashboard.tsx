@@ -11,14 +11,22 @@ import UserStatsCards from '@/components/ui/userStatsCard'
 import RecentProblems from '@/components/ui/recentProblems'
 import SubmissionsHistory from '@/components/ui/submissionHistory'
 import Image from 'next/image'
+import { DashboardData } from '@/types/type'
 
 axiosRetry(axios, { retries: 3 })
 
 const LazyPieChart = dynamic(() => import('@/components/ui/pieChart'), { ssr: false })
-
+interface User{
+  id: string;
+  userName: string;
+  Name: string;
+  Email: string;
+  avatar: string;
+  isAdmin:boolean;
+}
 export default function DashboardPage() {
   const { data: session } = useSession()
-  const [dashboardData, setDashboardData] = useState(null)
+  const [dashboardData, setDashboardData] = useState<DashboardData|null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string|null>(null)
 
@@ -27,15 +35,16 @@ export default function DashboardPage() {
     Medium: '#facc15',
     Hard: '#f87171'
   }), [])
-
+  const user=session?.user as User
+  
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (session?.user?.userName) {
+      if (user.userName) {
         setLoading(true)
         setError(null)
 
         try {
-          const response = await axios.get(`/api/user-stats?userName=${session.user.userName}`)
+          const response = await axios.get(`/api/user-stats?userName=${user.userName}`)
 
           setDashboardData(response.data)
         } catch (err) {
@@ -63,13 +72,13 @@ export default function DashboardPage() {
       </div>
     )
   }
-
-  const { userStats, recentProblems, problemDistribution, recentSubmissions } = dashboardData || {}
+if(!dashboardData)return
+  const { userStats, recentProblems, problemDistribution, recentSubmissions } = dashboardData 
 console.log(problemDistribution);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Welcome back, {session?.user?.Name || "Coder"}!</h1>
+      <h1 className="text-3xl font-bold mb-6">Welcome back, {user.Name || "Coder"}!</h1>
 
       <UserStatsCards userStats={userStats} />
 

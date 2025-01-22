@@ -23,10 +23,10 @@ const problemData=await req.json() as ProblemInput
       data: {
         problemDescription: problemData.problemD,
         problemName: problemData.problemName,
-        memoryLimit: problemData.memoryLimit,
-        timeLimit: problemData.timeLimit,
         difficulty: problemData.difficulty,
-        tags: problemData.tags
+        tags: problemData.tags,
+        memoryLimit:problemData.memoryLimit,
+        timeLimit:problemData.timeLimit
       },
     });
     

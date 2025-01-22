@@ -2,8 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Code, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import { Problem } from "@/types/type"
 
-export default function RecentProblems({ problems }) {
+interface RecentProblemsProps {
+  problems: Problem[];
+}
+
+export default function RecentProblems({ problems }: RecentProblemsProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
@@ -25,7 +30,6 @@ export default function RecentProblems({ problems }) {
                 }`}>
                   {problem.difficulty}
                 </span>
-                {problem.completed && <CheckCircle className="h-4 w-4 text-green-500" aria-label="Completed" />}
               </div>
             </li>
           ))}
@@ -37,4 +41,3 @@ export default function RecentProblems({ problems }) {
     </Card>
   )
 }
-

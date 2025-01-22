@@ -23,7 +23,7 @@ export default function LandingPage() {
       <div className="w-screen h-screen flex flex-col items-center justify-center">
       <Image className="scale-50" src={Loader} alt="Loading..." />
       <div className="mt-8 text-center">
-        <p className="text-2xl md:text-3xl font-bold text-white mb-2 animate-pulse">
+        <p className="text-xl md:text-2xl text-white font-bold  mb-2 animate-pulse">
           Hang tight, we're powering up!
         </p>
         <p className="text-lg md:text-xl  opacity-80">

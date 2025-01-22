@@ -3,8 +3,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { CheckCircle, XCircle } from 'lucide-react'
 import Link from 'next/link'
-
-export default function SubmissionsHistory({ submissions }) {
+import { Submission } from "@/types/type"
+interface submission{
+  submissions:Submission[]
+}
+export default function SubmissionsHistory({ submissions }:submission) {
   return (
     <Card>
       <CardHeader>
@@ -26,7 +29,7 @@ export default function SubmissionsHistory({ submissions }) {
           <TableBody>
             {submissions.map((submission) => (
               <TableRow key={submission.id}>
-                <TableCell className="font-medium">{submission.problem.problemName}</TableCell>
+                <TableCell className="font-medium">{submission.problem?.problemName}</TableCell>
                 <TableCell>
                   <div className="flex items-center">
                     {submission.status === 'Accepted' ? (

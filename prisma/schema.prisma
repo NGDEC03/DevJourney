@@ -27,7 +27,7 @@ model User {
 
 model Problem {
   problemId          String   @id @map("_id") @default(auto()) @db.ObjectId
-  problemName        String
+  problemName        String @unique
   problemDescription String
   difficulty         String
   attemptCount       Int      @default(0)
@@ -36,7 +36,6 @@ model Problem {
   timeLimit          Int
   tags               String[]
   createdAt          DateTime @default(now())
-
   userName    String?
   user        User?        @relation("UserProblems", fields: [userName], references: [userName])
   testCases   Case[]

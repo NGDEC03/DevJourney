@@ -11,16 +11,26 @@ import { Label } from "@/components/ui/label"
 import { AlertCircle, CircleArrowOutUpLeftIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { getSession, signIn } from 'next-auth/react'
+import { getSession, signIn, useSession } from 'next-auth/react'
 import { useRouter } from "next/navigation";
 
+interface User {
+  id: string;
+  userName: string;
+  Name: string;
+  Email: string;
+  avatar: string;
+  isAdmin: boolean;
+}
 export default function LoginPage() {
   const { toast } = useToast()
+
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error,setError] = useState<string | undefined | null>('')
+  const [error, setError] = useState<string | undefined | null>('')
   const router = useRouter()
-
+  const { data: session } = useSession()
+  const user = session?.user as User
 
   // const router = useRouter(); // Get the router instance
 
@@ -31,11 +41,11 @@ export default function LoginPage() {
       const res = await signIn('user-login', {
         username,
         password,
-        redirect: false, 
+        redirect: false,
       });
 
       if (res?.error) {
-        setError(res.error); 
+        setError(res.error);
         toast({
           title: '⚠️ Login Failed',
           description: res.error as string,
@@ -48,14 +58,14 @@ export default function LoginPage() {
           description: "You're all set! 🚀 Login to explore your dashboard.",
           duration: 1000,
         });
-        const session = await getSession()
-        if (session?.user?.isAdmin) {
+
+        if (user.isAdmin) {
           setTimeout(() => {
-            router.push('/ruler/dashboard'); 
+            router.push('/ruler/dashboard');
           }, 1000);
         } else {
           setTimeout(() => {
-            router.push('/dashboard'); 
+            router.push('/dashboard');
           }, 1000);
         }
       }
@@ -74,7 +84,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">Admin-Login</CardTitle>
-       
+
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -107,7 +117,7 @@ export default function LoginPage() {
             )}
             <Button type="submit" className="w-full">Login</Button>
           </form>
-          
+
         </CardContent>
       </Card>
     </div>

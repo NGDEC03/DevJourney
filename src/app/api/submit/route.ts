@@ -10,7 +10,7 @@ import { getLanguageId } from "@/utils/getLanguageId";
 export async function POST(req: NextRequest) {
     try {
         const { problemId, language, code, userName } = await req.json();
-        // console.log(problemId, language, code, userName)
+        console.log(problemId, language, code, userName)
 
         if (!problemId || !language || !code || !userName) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         }
 
         const languageId = await getLanguageId(language);
-        // console.log(languageId);
+        console.log(languageId);
 
         if (!languageId) {
             return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
@@ -51,11 +51,11 @@ export async function POST(req: NextRequest) {
 
         for (const testCase of problem.testCases) {
             if (abortDueToTLE) break;
-            // console.log(testCase)
-
+            
             const { input, output, caseId } = testCase;
             const timeLimit = problem.timeLimit;
             const memoryLimit = problem.memoryLimit;
+            console.log(input,output,timeLimit,memoryLimit,code,languageId,caseId)
             const result = await submitCode(code, languageId, {
                 input,
                 output,
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
 
             results.push(result);
         }
-        // console.log("exited");
+        console.log(results);
 
 
         const allPassed = results.every((result) => result.status === "Accepted");

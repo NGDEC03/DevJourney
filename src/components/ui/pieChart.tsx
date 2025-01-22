@@ -2,7 +2,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { PieChartIcon } from 'lucide-react'
 
-export default function ProblemDistributionChart({ data, colorMap }) {
+export default function ProblemDistributionChart({ data, colorMap }:{data:{name:string,value:number,color:string}[],colorMap:{Easy:string,Medium:string,Hard:string}}) {
   return (
     <Card>
       <CardHeader>
@@ -25,8 +25,8 @@ export default function ProblemDistributionChart({ data, colorMap }) {
                 paddingAngle={5}
                 dataKey="value"
               >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={colorMap[entry.name]} />
+                {data.map((entry:{name:string,value:number,color:string}, index:number) => (
+                  <Cell key={`cell-${index}`} fill={colorMap[entry.name as keyof typeof colorMap]} />
                 ))}
               </Pie>
               <Tooltip />
@@ -35,10 +35,10 @@ export default function ProblemDistributionChart({ data, colorMap }) {
           </ResponsiveContainer>
         </div>
         <div className="mt-2 grid grid-cols-3 gap-1 text-center">
-          {data.map((entry) => (
+          {data.map((entry:any) => (
             <div key={entry.name}>
               <div className="text-sm font-medium">{entry.name}</div>
-              <div className="text-2xl font-bold" style={{ color: colorMap[entry.name] }}>{entry.value}</div>
+              <div className="text-2xl font-bold" style={{ color: colorMap[entry.name as keyof typeof colorMap] }}>{entry.value}</div>
             </div>
           ))}
         </div>

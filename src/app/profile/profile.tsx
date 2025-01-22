@@ -18,6 +18,16 @@ import { useSession } from 'next-auth/react'
 import axios from 'axios'
 import { useToast } from '@/components/ui/use-toast'
 
+interface User{
+  id: string;
+  userName: string;
+  Name: string;
+  Email: string;
+  avatar: string;
+  isAdmin:boolean;
+}
+
+
 const schema = yup.object({
   userName: yup.string().required('Username is required'),
   Email: yup.string().email('Invalid email').required('Email is required'),
@@ -34,11 +44,11 @@ export function EditProfile() {
   const { data: session } = useSession()
   const [isEditing, setIsEditing] = useState(false)
   const [avatar, setAvatar] = useState<string | null>(null)
-
+const user=session?.user as User
   const initialData: FormData = {
-    userName: session?.user?.userName || '',
-    Email: session?.user?.email || '',
-    Name: session?.user?.name || '',
+    userName: user?.userName || '',
+    Email: user?.Email || '',
+    Name: user?.Name || '',
     password: '',
     cName: '',
     tags: [],
@@ -52,14 +62,14 @@ export function EditProfile() {
   useEffect(() => {
     if (session?.user) {
       reset({
-        userName: session.user.userName || '',
-        Email: session.user.email || '',
-        Name: session.user.name || '',
+        userName: user?.userName || '',
+        Email: user?.Email || '',
+        Name: user?.Name || '',
         password: '',
         cName: '',
         tags: [],
       })
-      setAvatar(session.user.image || null)
+      setAvatar(user.avatar || null)
     }
   }, [session, reset])
 
@@ -156,7 +166,7 @@ export function EditProfile() {
           <div className="flex items-center space-x-4">
             <Avatar className="w-20 h-20">
               <AvatarImage src={avatar || '/placeholder.svg'} />
-              <AvatarFallback>{session.user.userName?.charAt(0) || 'U'}</AvatarFallback>
+              <AvatarFallback>{user?.userName?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             {isEditing && (
               <Label htmlFor="avatar-upload" className="cursor-pointer">

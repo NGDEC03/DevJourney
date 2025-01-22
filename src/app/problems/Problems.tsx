@@ -82,7 +82,7 @@ export default function ProblemsPage() {
                   {problem.difficulty}
                 </Badge>
               </TableCell>
-              <TableCell>{(problem.successCount/problem.attemptCount * 100).toFixed(2)}%</TableCell>
+              <TableCell>{((problem.successCount/problem.attemptCount * 100)?(problem.successCount/problem.attemptCount * 100):0).toFixed(2)}%</TableCell>
             </TableRow>
           ))}
         </TableBody>

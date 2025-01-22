@@ -11,9 +11,9 @@ export const submitCode = async (
             {
                 source_code: code,
                 language_id: languageId,
+                cpu_time_limit:testCase.timeLimit,
                 stdin: testCase.input,
-                cpu_time_limit: testCase.timeLimit,
-                memory_limit: testCase.memoryLimit,
+                
                 expected_output: testCase.output,
             },
             {
