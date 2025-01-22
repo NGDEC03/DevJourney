@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       Hard: 0,
     }
 
-    user.problems.forEach((problem) => {
+    user.problems.forEach((problem:{problemId:string,difficulty:string,problemName:string,createdAt:Date}) => {
       problemDistribution[problem.difficulty as keyof typeof problemDistribution]++
     })
 

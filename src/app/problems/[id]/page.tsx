@@ -8,7 +8,7 @@ async function page({ params }: { params: Promise<string> }) {
     }
 
     return (
-        <ProblemPage id={problem_id}></ProblemPage>
+        <ProblemPage params={problem_id}></ProblemPage>
     )
 }
 
