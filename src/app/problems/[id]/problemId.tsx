@@ -70,7 +70,7 @@ console.log(id);
             try {
                 console.log(id);
                 
-                const data = await fetchProblem(id) as Problem;
+                const data = await fetchProblem(id.id) as Problem;
                 data.examples = data.testCases.slice(0, 3)
                 setProblemData(data)
             } catch (error) {
@@ -89,7 +89,7 @@ console.log(id);
     const handleSubmit = async () => {
         try {
             const response = await axios.post(`/api/submit`, {
-                problemId: id,
+                problemId: id.id,
                 language: language,
                 code: code,
                 userName: user.userName,

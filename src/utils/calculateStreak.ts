@@ -1,4 +1,4 @@
-import { prisma } from "@/prismaClient";
+import  prisma from "@/prismaClient";
 import { isSameDay, subDays } from "date-fns";
 
 export const calculateStreak = async (userName: string, submissionDate: Date) => {
