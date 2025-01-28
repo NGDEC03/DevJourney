@@ -64,7 +64,7 @@ export async function GET(request: Request) {
       userStats: {
         totalSolved: user.problems.length,
         solvedLastWeek: user.problems.filter(
-          (p) => p.createdAt > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          (p:{problemId:string,difficulty:string,problemName:string,createdAt:Date}) => p.createdAt > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
         ).length,
         streak: user.streak,
         ranking: user.ranking,

@@ -1,4 +1,4 @@
-import { prisma } from "@/prismaClient";
+import prisma  from "@/prismaClient";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 

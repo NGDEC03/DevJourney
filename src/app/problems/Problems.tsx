@@ -16,6 +16,8 @@ export default function ProblemsPage() {
   async function fetchProblems() {
     try {
       const response = await axios.get("/api/get-problems");
+      console.log(response.data);
+      
       setProblems(response.data.problems);
       setAllProblems(response.data.problems);
     } catch (error) {
@@ -70,7 +72,7 @@ export default function ProblemsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {problems.map((problem: any) => (
+          {problems.map((problem) => (
             <TableRow key={problem.problemId}>
               <TableCell>
                 <Link href={`/problems/${problem.problemId}`} className="text-blue-600 hover:underline">
