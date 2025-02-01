@@ -1,0 +1,15 @@
+name: Scheduled Email Job
+
+on:
+  schedule:
+    - cron: "0 20 * * *" 
+  workflow_dispatch: 
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call Next.js API to Send Email
+        run: |
+          curl -X POST "https://dev-journey-alpha.vercel.app/api/send-mail"
