@@ -8,11 +8,7 @@ export const runtime = 'nodejs';
 
 
 export async function POST(request: Request) {
-  // Ensure this route can only be called by Vercel Cron Job
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+
 
   try {
     const today = dayjs().startOf("day").toDate();
