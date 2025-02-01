@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 import SessionWrapper from "@/lib/sessionWrapper";
-import SocketInitializer from "@/components/SocketInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +26,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  <SocketInitializer/>
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen flex flex-col">
