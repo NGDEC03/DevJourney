@@ -4,8 +4,8 @@ import { sendMail } from "@/utils/sendMail";
 import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
+export const runtime = 'nodejs';
 
-export const runtime = "edge";
 
 export async function POST(request: Request) {
   // Ensure this route can only be called by Vercel Cron Job
@@ -17,26 +17,22 @@ export async function POST(request: Request) {
   try {
     const today = dayjs().startOf("day").toDate();
 
-    // Fetch users who have a non-zero streak
     const users = await prisma.user.findMany({
       where: {
-        streak: { gt: 0 }, // Only users with an active streak
+        streak: { gt: 0 }, 
       },
       include: {
         submissions: {
           orderBy: { submittedAt: "desc" },
-          take: 1, // Get the latest submission
+          take: 1,
         },
       },
     });
 
-    // Filter users whose last submission was before today
     const usersWithBreakingStreak = users.filter((user) => {
       const lastSubmission = user.submissions[0]?.submittedAt;
       return !lastSubmission || dayjs(lastSubmission).isBefore(today);
     });
-
-    // Send email reminders
     for (const user of usersWithBreakingStreak) {
       await sendMail({
         recipient: user.email,
