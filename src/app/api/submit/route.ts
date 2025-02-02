@@ -1,4 +1,4 @@
-import  prisma  from "@/prismaClient";
+import prisma from "@/prismaClient";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 import { subDays, isSameDay } from "date-fns";
@@ -9,8 +9,8 @@ import { getLanguageId } from "@/utils/getLanguageId";
 
 export async function POST(req: NextRequest) {
     try {
-        const { problemId, language, code, userName } = await req.json();
-        console.log(problemId, language, code, userName)
+        const { problemId, language, code, userName, test } = await req.json();
+        // console.log(problemId, language, code, userName)
 
         if (!problemId || !language || !code || !userName) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -21,12 +21,20 @@ export async function POST(req: NextRequest) {
             include: { testCases: true },
         });
 
+
         if (!problem) {
             return NextResponse.json({ error: "Problem not found" }, { status: 404 });
         }
+        //    console.log(problem.testCases);
+        //    console.log(test);
+        if (test != -1) {
+            problem.testCases = problem.testCases.slice(0, test);
+        }
+        // console.log(problem.testCases);
+        // return;
 
         const languageId = await getLanguageId(language);
-        console.log(languageId);
+        // console.log(languageId);
 
         if (!languageId) {
             return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
@@ -51,11 +59,11 @@ export async function POST(req: NextRequest) {
 
         for (const testCase of problem.testCases) {
             if (abortDueToTLE) break;
-            
+
             const { input, output, caseId } = testCase;
             const timeLimit = problem.timeLimit;
             const memoryLimit = problem.memoryLimit;
-            console.log(input,output,timeLimit,memoryLimit,code,languageId,caseId)
+            // console.log(input,output,timeLimit,memoryLimit,code,languageId,caseId)
             const result = await submitCode(code, languageId, {
                 input,
                 output,
@@ -72,59 +80,59 @@ export async function POST(req: NextRequest) {
 
             results.push(result);
         }
-        console.log(results);
+        // console.log(results);
 
 
         const allPassed = results.every((result) => result.status === "Accepted");
         const overallStatus = allPassed ? "Accepted" : "Failed";
-        console.log(allPassed, overallStatus);
+        // console.log(allPassed, overallStatus);
+        if (test === -1) {
+            const { streak } = await calculateStreak(userName, new Date());
 
-        const {streak} = await calculateStreak(userName,new Date());
+            // console.log(streak+" "+problem.problemId+" "+userName);
 
-        // console.log(streak+" "+problem.problemId+" "+userName);
-
-        await prisma.$transaction(async (prisma) => {
-            await prisma.submission.create({
-                data: {
-                    status: overallStatus,
-                    language: language,
-                    problem: {
-                        connect: {
-                            problemId: problem.problemId
-                        }
-                    },
-                    user: {
-                        connect: {
-                            userName: userName
-                        }
-                    }
-                }
-            });
-        
-            await prisma.problem.update({
-                where: { problemId: problem.problemId },
-                data: {
-                    attemptCount: { increment: 1 },
-                    ...(allPassed && {
-                        successCount: { increment: 1 },
+            await prisma.$transaction(async (prisma) => {
+                await prisma.submission.create({
+                    data: {
+                        status: overallStatus,
+                        language: language,
+                        problem: {
+                            connect: {
+                                problemId: problem.problemId
+                            }
+                        },
                         user: {
                             connect: {
-                                userName
+                                userName: userName
                             }
                         }
-                    }),
-                },
+                    }
+                });
+
+                await prisma.problem.update({
+                    where: { problemId: problem.problemId },
+                    data: {
+                        attemptCount: { increment: 1 },
+                        ...(allPassed && {
+                            successCount: { increment: 1 },
+                            user: {
+                                connect: {
+                                    userName
+                                }
+                            }
+                        }),
+                    },
+                });
+
+                await prisma.user.update({
+                    where: { userName },
+                    data: {
+                        ...(allPassed && { streak }),
+                    },
+                });
+
             });
-        
-            await prisma.user.update({
-                where: { userName },
-                data: {
-                    ...(allPassed && { streak }),
-                },
-            });
-            
-        });
-        
+        }
         const failedTestCase = results.find((result) => result.status !== "Accepted");
         const response = {
             status: overallStatus,
