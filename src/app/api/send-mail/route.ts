@@ -32,10 +32,14 @@ export async function POST(request: Request) {
     for (const user of usersWithBreakingStreak) {
       await sendMail({
         recipient: user.email,
-        subject: "Your Streak is About to Break!",
-        text: `Hello ${user.name}, don't forget to submit a problem today to maintain your streak!`,
-        html: `<h1>Hello ${user.name}</h1><p>Your streak is about to break! Solve a problem today to keep it going.</p>`,
+        subject: "Reminder: Maintain Your Streak!",
+        text: `Hello ${user.name},\n\nWe noticed you haven’t submitted a problem today. Keep your streak alive by solving one before the day ends!\n\nBest regards,\nThe DevJourney Team`,
+        html: `<h3>Hello ${user.name},</h3>
+               <p>We noticed that you haven’t submitted a problem today. To maintain your streak, be sure to complete one before the day ends.</p>
+               <p>Keep up the great work!</p>
+               <p>Best regards,<br>The DevJourney Team</p>`,
       });
+      
     }
 
     return NextResponse.json({ message: "Reminder emails sent successfully" });
