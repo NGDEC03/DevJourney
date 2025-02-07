@@ -123,6 +123,9 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
   // console.log(id);
 
   const { data: session } = useSession()
+  const [selectedTestResult, setSelectedTestResult] = useState<any>(null)
+  const [isTestResultDialogOpen, setIsTestResultDialogOpen] = useState(false)
+
   const user = session?.user as User
   const [problemData, setProblemData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -135,6 +138,14 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
   const [passed, setPassed] = useState(0)
   const [failed, setFailed] = useState(0)
   const [submitted, setSubmitted] = useState(false)
+  const handleClick = (result: any, testCase) => {
+    console.log(result+" "+testCase);
+    
+    setSelectedTestResult({ ...result, testCase })
+    console.log("you want this->",selectedTestResult);
+    
+    setIsTestResultDialogOpen(true)
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -244,29 +255,28 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                   <CardTitle className="text-3xl font-bold">{problemData.problemName}</CardTitle>
                 </div>
                 <Badge
-                  className={`text-sm font-semibold px-3 py-1 rounded-full ${
-                    problemData.difficulty === "Easy"
+                  className={`text-sm font-semibold px-3 py-1 rounded-full ${problemData.difficulty === "Easy"
                       ? "bg-green-100 text-green-800"
                       : problemData.difficulty === "Medium"
                         ? "bg-yellow-100 text-yellow-800"
                         : "bg-red-100 text-red-800"
-                  }`}
+                    }`}
                 >
                   {problemData.difficulty}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-            <div className="list-disc list-inside">
-        {problemData.problemDescription.split("\n").map((line, index) => (
-          <p className="mb-2" key={index}>{line}</p>
-        ))}
-      </div>
+              <div className="list-disc list-inside">
+                {problemData.problemDescription.split("\n").map((line, index) => (
+                  <p className="mb-2" key={index}>{line}</p>
+                ))}
+              </div>
               <div className="flex items-center space-x-6 mb-6">
                 <div className="flex items-center">
                   <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
                   <span className="text-sm font-medium">
-                    {((problemData.successCount / problemData.attemptCount) * 100).toFixed(1)!=="NaN"?((problemData.successCount / problemData.attemptCount) * 100).toFixed(1):"0"}% Success
+                    {((problemData.successCount / problemData.attemptCount) * 100).toFixed(1) !== "NaN" ? ((problemData.successCount / problemData.attemptCount) * 100).toFixed(1) : "0"}% Success
                   </span>
                 </div>
                 <div className="flex items-center">
@@ -297,7 +307,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                 ))}
               </div>
               <Separator className="my-6" />
-<InputOutputFormat inputFormat={problemData?.inputFormat} outputFormat={problemData?.outputFormat}/>
+              <InputOutputFormat inputFormat={problemData?.inputFormat} outputFormat={problemData?.outputFormat} />
             </CardContent>
           </Card>
 
@@ -405,8 +415,8 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
 
           {tested && results && (
             <Card className="overflow-hidden border border-gray-200 rounded-lg shadow-lg">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4">
-                <h3 className="text-xl font-bold text-white">Sample Tests Results</h3>
+              <div className="p-4">
+                <h3 className="text-2xl font-bold text-black"> Test Results</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -421,7 +431,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                   <tbody>
                     {console.log(results)}
                     {results.map((result, idx) => (
-                      <tr key={idx} className="border-t border-gray-200">
+                      <tr key={idx} className="border-t border-gray-200" onClick={()=>handleClick(result,problemData.testCases[idx])}>
                         <td className="px-4 py-2 text-sm font-medium text-gray-900">{idx + 1}</td>
                         <td className="px-4 py-2">
                           {result.status === "Accepted" ? (
@@ -445,9 +455,59 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
               </div>
             </Card>
           )}
+          <Dialog open={isTestResultDialogOpen} onOpenChange={setIsTestResultDialogOpen}>
+  <DialogContent className="max-w-2xl">
+    <DialogHeader>
+      <DialogTitle>Test Case Details</DialogTitle>
+      <DialogDescription>
+        {selectedTestResult ? (
+          <div className="space-y-4 mt-4">
+            <div>
+              <h3 className="font-semibold text-lg">Input</h3>
+              <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
+                {selectedTestResult.testCase.input??""}
+              </pre>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Expected Output</h3>
+              <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
+                {selectedTestResult.testCase?.output ??""}
+              </pre>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Your Output</h3>
+              <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
+                {selectedTestResult.stdout|| 'No output'}
+              </pre>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold">Status</h3>
+                <Badge 
+                  className={`${selectedTestResult.status==="Accepted"?"bg-green-800":"bg-red-400"}`}
+                >
+                  {selectedTestResult.status}
+                </Badge>
+              </div>
+              <div>
+                <h3 className="font-semibold">Performance</h3>
+                <p>Time: {selectedTestResult.timeTaken ?? 'N/A'} ms</p>
+                <p>Memory: {selectedTestResult.memoryUsage ?? 'N/A'} KB</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-500">No test case selected.</p>
+        )}
+      </DialogDescription>
+    </DialogHeader>
+  </DialogContent>
+</Dialog>
+
+    </div>
         </div>
       </div>
-    </div>
+    
   )
 }
 
