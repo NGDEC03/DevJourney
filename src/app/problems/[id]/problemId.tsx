@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { InputOutputFormat } from "@/components/ui/InputOutputFormat"
 
 // const results2 = [
 //     {
@@ -256,12 +257,16 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 mb-4">{problemData.problemDescription}</p>
+            <div className="list-disc list-inside">
+        {problemData.problemDescription.split("\n").map((line, index) => (
+          <p className="mb-2" key={index}>{line}</p>
+        ))}
+      </div>
               <div className="flex items-center space-x-6 mb-6">
                 <div className="flex items-center">
                   <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
                   <span className="text-sm font-medium">
-                    {((problemData.successCount / problemData.attemptCount) * 100).toFixed(1)}% Success
+                    {((problemData.successCount / problemData.attemptCount) * 100).toFixed(1)!=="NaN"?((problemData.successCount / problemData.attemptCount) * 100).toFixed(1):"0"}% Success
                   </span>
                 </div>
                 <div className="flex items-center">
@@ -292,17 +297,8 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                 ))}
               </div>
               <Separator className="my-6" />
-
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Constraints</h3>
-                <ul className="list-disc list-inside space-y-2">
-                  {problemData.constraint.map((constraint: string, index: number) => (
-                    <li key={index} className="text-gray-700">
-                      {constraint}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+<InputOutputFormat inputFormat={problemData.inputFormat} outputFormat={problemData.outputFormat}/>
+              
             </CardContent>
           </Card>
 
