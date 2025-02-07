@@ -130,7 +130,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
   const [problemData, setProblemData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [code, setCode] = useState("")
-  const [language, setLanguage] = useState("javascript")
+  const [language, setLanguage] = useState("java")
   const [tested, setTested] = useState(false)
   const [results, setResults] = useState<any>(null)
   const [testing, setTesting] = useState(false)

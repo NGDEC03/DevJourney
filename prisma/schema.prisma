@@ -41,6 +41,8 @@ model Problem {
   testCases   Case[]
   constraint  String[]
   submissions Submission[]
+  inputFormat String
+  outputFormat String
 
 }
 

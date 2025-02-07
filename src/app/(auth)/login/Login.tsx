@@ -26,29 +26,33 @@ export default function LoginPage() {
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
-
     try {
       const res = await signIn('user-login', {
         username,
         password,
-        callbackUrl: "/dashboard",
-        redirect: true, // Disable automatic redirect
-      });
+        redirect: false,
+      })
 
       if (res?.error) {
-        setError(res.error); // Set error state for alert
+        setError(res.error)
         toast({
           title: '⚠️ Login Failed',
           description: res.error as string,
           variant: 'destructive',
           duration: 2000,
-        });
+        })
       } else {
         toast({
           title: '🎉 Login Successful!',
           description: "You're all set! 🚀 Login to explore your dashboard.",
           duration: 1000,
-        });
+        })
+
+       
+          
+            router.push('/dashboard')
+          
+        
       }
     } catch (err) {
       toast({
@@ -56,9 +60,9 @@ export default function LoginPage() {
         description: 'Something went wrong. Please try again later.',
         variant: 'destructive',
         duration: 2000,
-      });
+      })
     }
-  };
+  }
 
   return (
     <div className="container mx-auto flex items-center justify-center min-h-screen">

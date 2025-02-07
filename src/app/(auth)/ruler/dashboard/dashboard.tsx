@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { useForm, SubmitHandler } from 'react-hook-form'
+import { useEffect, useState } from "react"
+import { useForm, type SubmitHandler, Controller } from "react-hook-form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,24 +10,25 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useToast } from '@/components/ui/use-toast'
-import { TagSelector } from '@/components/TagSelector'
-import axios from 'axios'
+import { useToast } from "@/components/ui/use-toast"
+import { TagSelector } from "@/components/TagSelector"
+import axios from "axios"
+import { Loader2 } from "lucide-react"
 
 interface ProblemFormData {
-  problemName: string;
-  problemD: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  timeLimit: number;
-  memoryLimit: number;
-  tags: string[];
+  problemName: string
+  problemD: string
+  difficulty: "Easy" | "Medium" | "Hard"
+  timeLimit: number
+  memoryLimit: number
+  tags: string[]
 }
 
 interface TestCaseFormData {
-  problemId: number;
-  input: string;
-  output: string;
-  explanation?: string;
+  problemId: number
+  input: string
+  output: string
+  explanation?: string
 }
 
 // Mock data for users (replace with actual API call in production)
@@ -40,12 +41,42 @@ const mockUsers = [
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("add-problem")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>("Easy")
+  const [difficulty, setDifficulty] = useState<"Easy" | "Medium" | "Hard">("Easy")
   const { toast } = useToast()
 
-  const { register: registerProblem, handleSubmit: handleSubmitProblem, formState: { errors: problemErrors } } = useForm<ProblemFormData>()
+  const {
+    register: registerProblem,
+    handleSubmit: handleSubmitProblem,
+    formState: { errors: problemErrors },
+  } = useForm<ProblemFormData>()
 
-  const { register: registerTestCase, handleSubmit: handleSubmitTestCase, formState: { errors: testCaseErrors } } = useForm<TestCaseFormData>()
+  const {
+    register: registerTestCase,
+    handleSubmit: handleSubmitTestCase,
+    control,
+    formState: { errors: testCaseErrors },
+  } = useForm<TestCaseFormData>()
+
+  const [problems, setProblems] = useState([])
+  const [isLoadingProblems, setIsLoadingProblems] = useState(false)
+  const [problemsError, setProblemsError] = useState<string|null>(null)
+
+  useEffect(() => {
+    const fetchProblems = async () => {
+      setIsLoadingProblems(true)
+      try {
+        const response = await axios.get("/api/get-problems")
+        setProblems(response.data || [])
+      } catch (error) {
+        setProblemsError("Failed to load problems.")
+        console.error("Error fetching problems:", error)
+      } finally {
+        setIsLoadingProblems(false)
+      }
+    }
+
+    fetchProblems()
+  }, [])
 
   const onSubmitProblem: SubmitHandler<ProblemFormData> = async (data) => {
     try {
@@ -60,23 +91,21 @@ export default function AdminDashboard() {
         tags: data.tags,
       })
       toast({
-        title: 'Success',
-        description: 'Problem added successfully!',
-        variant: 'default',
-      });
+        title: "Success",
+        description: "Problem added successfully!",
+        variant: "default",
+      })
     } catch (error) {
       toast({
-        title: '⚠️ Unexpected Error',
-        description: 'Failed to add problem. Please try again.',
-        variant: 'destructive',
-      });
+        title: "⚠️ Unexpected Error",
+        description: "Failed to add problem. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
   const onSubmitTestCase: SubmitHandler<TestCaseFormData> = async (data) => {
     try {
-      // Replace with actual API call
-      // console.log("Submitting test case:", data)
       const response = await axios.post(`/api/add-test/`, {
         input: data.input,
         output: data.output,
@@ -84,16 +113,16 @@ export default function AdminDashboard() {
         problemId: data.problemId,
       })
       toast({
-        title: 'Success',
-        description: 'Test case added successfully!',
-        variant: 'default',
-      });
+        title: "Success",
+        description: "Test case added successfully!",
+        variant: "default",
+      })
     } catch (error) {
       toast({
-        title: '⚠️ Unexpected Error',
-        description: 'Failed to add test case. Please try again.',
-        variant: 'destructive',
-      });
+        title: "⚠️ Unexpected Error",
+        description: "Failed to add test case. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -116,17 +145,23 @@ export default function AdminDashboard() {
               <form onSubmit={handleSubmitProblem(onSubmitProblem)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="problemName">Problem Name</Label>
-                  <Input id="problemName" {...registerProblem("problemName", { required: "Problem name is required" })} />
+                  <Input
+                    id="problemName"
+                    {...registerProblem("problemName", { required: "Problem name is required" })}
+                  />
                   {problemErrors.problemName && <p className="text-red-500">{problemErrors.problemName.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="problemD">Problem Description</Label>
-                  <Textarea id="problemD" {...registerProblem("problemD", { required: "Problem description is required" })} />
+                  <Textarea
+                    id="problemD"
+                    {...registerProblem("problemD", { required: "Problem description is required" })}
+                  />
                   {problemErrors.problemD && <p className="text-red-500">{problemErrors.problemD.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="difficulty">Difficulty</Label>
-                  <Select onValueChange={(value: 'Easy' | 'Medium' | 'Hard') => setDifficulty(value)}>
+                  <Select onValueChange={(value: "Easy" | "Medium" | "Hard") => setDifficulty(value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select difficulty" />
                     </SelectTrigger>
@@ -140,12 +175,26 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="timeLimit">Time Limit (seconds)</Label>
-                  <Input id="timeLimit" type="number" {...registerProblem("timeLimit", { required: "Time limit is required", min: { value: 1, message: "Time limit must be at least 1 second" } })} />
+                  <Input
+                    id="timeLimit"
+                    type="number"
+                    {...registerProblem("timeLimit", {
+                      required: "Time limit is required",
+                      min: { value: 1, message: "Time limit must be at least 1 second" },
+                    })}
+                  />
                   {problemErrors.timeLimit && <p className="text-red-500">{problemErrors.timeLimit.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="memoryLimit">Memory Limit (MB)</Label>
-                  <Input id="memoryLimit" type="number" {...registerProblem("memoryLimit", { required: "Memory limit is required", min: { value: 1, message: "Memory limit must be at least 1 MB" } })} />
+                  <Input
+                    id="memoryLimit"
+                    type="number"
+                    {...registerProblem("memoryLimit", {
+                      required: "Memory limit is required",
+                      min: { value: 1, message: "Memory limit must be at least 1 MB" },
+                    })}
+                  />
                   {problemErrors.memoryLimit && <p className="text-red-500">{problemErrors.memoryLimit.message}</p>}
                 </div>
                 <div className="space-y-2">
@@ -167,8 +216,35 @@ export default function AdminDashboard() {
             <CardContent>
               <form onSubmit={handleSubmitTestCase(onSubmitTestCase)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="problemId">Problem ID</Label>
-                  <Input id="problemId" type="text" {...registerTestCase("problemId", { required: "Problem ID is required", min: { value: 1, message: "Problem ID must be at least 1" } })} />
+                  <Label htmlFor="problemId">Problem</Label>
+                  {isLoadingProblems ? (
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Loading problems...</span>
+                    </div>
+                  ) : problemsError ? (
+                    <div className="text-red-500">{problemsError}</div>
+                  ) : (
+                    <Controller
+                      name="problemId"
+                      control={control}
+                      rules={{ required: "Problem is required" }}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a problem" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {problems.map((problem,idx) => (
+                              <SelectItem key={problem.id} value={problem.id.toString()}>
+                                idx+1 - {problem.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  )}
                   {testCaseErrors.problemId && <p className="text-red-500">{testCaseErrors.problemId.message}</p>}
                 </div>
                 <div className="space-y-2">
@@ -216,7 +292,9 @@ export default function AdminDashboard() {
                       <TableCell>{user.problemsSolved}</TableCell>
                       <TableCell>{user.rank}</TableCell>
                       <TableCell>
-                        <Button variant="outline" size="sm" onClick={() => console.log("Edit user:", user.userName)}>Edit</Button>
+                        <Button variant="outline" size="sm" onClick={() => console.log("Edit user:", user.userName)}>
+                          Edit
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
