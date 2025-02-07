@@ -20,7 +20,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { InputOutputFormat } from "@/components/ui/InputOutputFormat"
 
 // const results2 = [
 //     {
@@ -304,8 +303,6 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                   ))}
                 </ul>
               </div>
-              <Separator className="my-6" />
-              <InputOutputFormat inputFormat={problemData.inputFormat} outputFormat={problemData.outputFormat} />
             </CardContent>
           </Card>
 
