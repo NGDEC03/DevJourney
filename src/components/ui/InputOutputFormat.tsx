@@ -1,11 +1,6 @@
 import React from "react";
 
-interface InputOutputFormatProps {
-  inputFormat?: string;
-  outputFormat?: string;
-}
-
-export function InputOutputFormat({ inputFormat = "", outputFormat = "" }: InputOutputFormatProps) {
+export function InputOutputFormat({ inputFormat = "", outputFormat = "" }) {
   console.log("Received Props - inputFormat:", inputFormat);
   console.log("Received Props - outputFormat:", outputFormat);
 
