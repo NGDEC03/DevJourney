@@ -297,8 +297,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                 ))}
               </div>
               <Separator className="my-6" />
-{/* <InputOutputFormat inputFormat={problemData.inputFormat} outputFormat={problemData.outputFormat}/>
-               */}
+<InputOutputFormat inputFormat={problemData?.inputFormat} outputFormat={problemData?.outputFormat}/>
             </CardContent>
           </Card>
 
