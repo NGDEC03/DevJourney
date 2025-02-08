@@ -3,10 +3,11 @@ import { Progress } from "@/components/ui/progress"
 import { UserStats } from "@/types/type";
 import { CheckCircle, BarChart, Trophy, BookOpen } from 'lucide-react'
 interface UserStat{
-  userStats:UserStats
+  userStats:UserStats,
+  problems:any
 }
 
-export default function UserStatsCards({ userStats }:UserStat) {
+export default function UserStatsCards({ userStats,problems }:UserStat) {
     console.log(userStats);
     
   return (
@@ -49,8 +50,8 @@ export default function UserStatsCards({ userStats }:UserStat) {
           <BookOpen className="h-4 w-4 text-muted-foreground" aria-label="Learning Progress" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{Math.round(userStats.learningProgress * 100)}%</div>
-          <Progress value={userStats.learningProgress * 100} className="mt-2" />
+          <div className="text-2xl font-bold">{Math.round((userStats.totalSolved/problems) * 100)}%</div>
+          <Progress value={Math.round((userStats.totalSolved/problems) * 100)} className="mt-2" />
         </CardContent>
       </Card>
     </div>

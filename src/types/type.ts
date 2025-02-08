@@ -26,6 +26,7 @@ export interface Problem {
     recentProblems: Array<{ problemId: string; problemName: string; difficulty: string; completed: boolean }>;
     problemDistribution: Array<{ name: string; value: number; color: string }>;
     recentSubmissions: Array<{ id: string; problemId: string; status: string; submittedAt: string }>;
+    problems:any
   }
   
   export interface UserStats {

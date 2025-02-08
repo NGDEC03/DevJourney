@@ -73,14 +73,16 @@ export default function DashboardPage() {
     )
   }
 if(!dashboardData)return
-  const { userStats, recentProblems, problemDistribution, recentSubmissions } = dashboardData 
-console.log(problemDistribution);
+console.log(dashboardData);
+
+  const { userStats, recentProblems, problemDistribution, recentSubmissions,problems } = dashboardData 
+
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Welcome back, {user.Name || "Coder"}!</h1>
 
-      <UserStatsCards userStats={userStats} />
+      <UserStatsCards userStats={userStats} problems={problems} />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
         <RecentProblems problems={recentProblems} />

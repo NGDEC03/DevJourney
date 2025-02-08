@@ -17,7 +17,6 @@ export async function GET(request: Request) {
       include: {
         problems: {
           orderBy: { createdAt: 'desc' },
-          take: 5,
           select: {
             problemId: true,
             problemName: true,
@@ -27,7 +26,6 @@ export async function GET(request: Request) {
         },
         submissions: {
           orderBy: { submittedAt: 'desc' },
-          take: 5,
           include: {
             problem: {
               select: { problemName: true, difficulty: true },
@@ -36,6 +34,9 @@ export async function GET(request: Request) {
         },
       },
     })
+    
+    const problems=await prisma.problem.findMany()
+
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -74,6 +75,7 @@ export async function GET(request: Request) {
       recentProblems: user.problems,
       recentSubmissions: user.submissions,
       problemDistribution: distributionResult,
+      problems:problems
     })
   } catch (error) {
     console.error('Error fetching user data:', error)
