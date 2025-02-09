@@ -1,8 +1,8 @@
 import React from "react";
 
 export function InputOutputFormat({ inputFormat = "", outputFormat = "" }) {
-  console.log("Received Props - inputFormat:", inputFormat);
-  console.log("Received Props - outputFormat:", outputFormat);
+  // console.log("Received Props - inputFormat:", inputFormat);
+  // console.log("Received Props - outputFormat:", outputFormat);
 
   return (
     <div className="space-y-4">

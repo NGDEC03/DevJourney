@@ -150,11 +150,19 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log(id)
+        // console.log(id)
 
         const data = (await fetchProblem(id.id)) as Problem
-        data.examples = data.testCases.slice(0, 3)
+        let examples = []
+        data.testCases.forEach((test) => {
+          if (test.explanation) {
+            examples.push(test)
+          }
+        })
+        // data.examples = data.testCases.slice(0, 3)
+        data.examples = examples.slice(0, 3)
         setProblemData(data)
+        // console.log(data);
       } catch (error) {
         console.error("Error fetching problem data", error)
       } finally {
@@ -330,11 +338,11 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                 {problemData.examples.map((example: any, index: number) => (
                   <div key={index} className="bg-gray-50 p-4 rounded-lg">
                     <p className="font-semibold mb-2">Example {index + 1}:</p>
-                    <p>
-                      <strong>Input:</strong> {example.input}
+                    <p className="whitespace-pre-line">
+                      <strong>Input:</strong> <br /> {example.input}
                     </p>
-                    <p>
-                      <strong>Output:</strong> {example.output}
+                    <p  className="whitespace-pre-line">
+                      <strong>Output:</strong> <br /> {example.output}
                     </p>
                     <p>
                       <strong>Explanation:</strong> {example.explanation}
