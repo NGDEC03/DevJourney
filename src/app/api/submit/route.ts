@@ -27,9 +27,7 @@ export async function POST(req: NextRequest) {
         }
         //    console.log(problem.testCases);
         //    console.log(test);
-        if (test != -1) {
-            problem.testCases = problem.testCases.slice(0, test);
-        }
+       
         // console.log(problem.testCases);
         // return;
 
@@ -57,7 +55,7 @@ export async function POST(req: NextRequest) {
         // console.log(t);
         // console.log("entered");
 
-        for (const testCase of problem.testCases) {
+        for (const testCase of problem.testCases.slice(0,5)) {
             if (abortDueToTLE) break;
 
             const { input, output, caseId } = testCase;
@@ -71,7 +69,7 @@ export async function POST(req: NextRequest) {
                 memoryLimit,
                 caseId,
             });
-            // console.log(result);
+            console.log(result);
 
             // Check for TLE
             if (result.status.description === "Time Limit Exceeded") {
