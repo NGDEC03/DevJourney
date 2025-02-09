@@ -23,6 +23,7 @@ model User {
   ranking          Int?
   learningProgress Float?
   isAdmin          Boolean?
+  isVerified       Boolean  @default(false)
 }
 
 model Problem {
