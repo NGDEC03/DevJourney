@@ -21,7 +21,6 @@ const authOptions = {
                 if (!credentials?.username || !credentials.password) {
                     throw new Error("Invalid credentials");
                 }
-                console.log(await prisma.user.findMany())
                 console.log(credentials.username + credentials.password);
                 const user = await prisma.user.findUnique({
                     where: {
@@ -32,12 +31,15 @@ const authOptions = {
                 if (!user) {
                     throw new Error("No user found");
                 }
-
+                
                 const valid = await bcrypt.compare(credentials.password, user.password);
                 if (!valid) {
                     throw new Error("Invalid password");
                 }
-
+                
+                if(!user.isVerified){
+                    throw new Error("Your email is not verified. Please verify before logging in.")
+                }
                 return {
                     id: '21',
                     userName: user.userName,

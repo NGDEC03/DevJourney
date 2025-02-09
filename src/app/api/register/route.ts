@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { sendMail } from '@/utils/sendMail';
 
 const prisma = new PrismaClient();
 
@@ -59,6 +60,26 @@ export async function POST(req: NextRequest) {
         tags: selectedTags || [],
       },
     });
+    const link=`https://dev-journey-alpha.vercel.app/verify?token=${100+Math.random()*(1000-100)}&user=${encodeURIComponent(userName)}`
+
+    await sendMail({
+      text:`Hello ${userName}, click this link to verify your account: ${link}`,
+      subject:"One Last Step! Verify Your Email & Unlock Full Access to Our Platform",
+      recipient:Email,
+      html:`<div style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
+      <h2 style="color: #333;">Hello, ${userName} 👋</h2>
+      <p>You're almost there! Click the button below to verify your account.</p>
+      <a href="${link}" 
+         style="display: inline-block; background: #007bff; color: #fff; padding: 10px 20px; 
+                font-size: 16px; text-decoration: none; border-radius: 5px;">
+          Verify Your Account
+      </a>
+      <p style="margin-top: 20px; font-size: 14px; color: #777;">Or copy this link:</p>
+      <p style="word-break: break-all; font-size: 14px; color: #007bff;">${link}</p>
+      <br/>
+      <p style="color: #777; font-size: 12px;">If you didn't request this, please ignore this email.</p>
+  </div>`
+    })
 
     return NextResponse.json({
       message: 'User registered successfully',
