@@ -1,15 +1,22 @@
-name: Scheduled Email Job
+name: Scheduled Email & Streak Reset Jobs
 
 on:
   schedule:
-    - cron: "30 14 * * *" 
-  workflow_dispatch: 
+    - cron: "30 14 * * *"  
+    - cron: "31 18 * * *"  
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   send-email:
     runs-on: ubuntu-latest
-
     steps:
       - name: Call Next.js API to Send Email
         run: |
           curl -X POST "https://dev-journey-alpha.vercel.app/api/send-mail"
+
+  reset-streak:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Next.js API to Reset Streak
+        run: |
+          curl -X POST "https://dev-journey-alpha.vercel.app/api/reset-streak"
