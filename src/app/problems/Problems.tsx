@@ -47,7 +47,30 @@ export default function ProblemsPage() {
 
   if(loading) {
     return (
-      <SkeletonLoader/>
+      <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Problem</TableHead>
+              <TableHead>Difficulty</TableHead>
+              <TableHead>Acceptance</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[...Array(5)].map((_, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <div className="h-6 bg-gray-200 rounded-md animate-pulse w-48"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-6 bg-gray-200 rounded-md animate-pulse w-20"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-6 bg-gray-200 rounded-md animate-pulse w-16"></div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
     )
   }
   // console.log(problems)

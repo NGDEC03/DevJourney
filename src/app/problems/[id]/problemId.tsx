@@ -165,8 +165,44 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
   }, [id.id])
 
   if (loading) {
-    return <SkeletonLoader />
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div className="w-2/3 h-8 bg-gray-300 rounded animate-pulse"></div>
+                  <div className="w-16 h-6 bg-gray-300 rounded animate-pulse"></div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="h-4 bg-gray-300 rounded w-full animate-pulse"></div>
+                  <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+                  <div className="h-4 bg-gray-300 rounded w-2/3 animate-pulse"></div>
+                </div>
+                <div className="flex items-center space-x-6 mt-4">
+                  <div className="w-24 h-5 bg-gray-300 rounded animate-pulse"></div>
+                  <div className="w-24 h-5 bg-gray-300 rounded animate-pulse"></div>
+                  <div className="w-24 h-5 bg-gray-300 rounded animate-pulse"></div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+  
+          <div className="space-y-6">
+            <Card className="h-[400px] bg-gray-200 animate-pulse"></Card>
+            <div className="flex space-x-4">
+              <div className="w-24 h-10 bg-gray-300 rounded animate-pulse"></div>
+              <div className="w-24 h-10 bg-gray-300 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
+  
 
   const handleSubmit = async () => {
     if (code === "") {
