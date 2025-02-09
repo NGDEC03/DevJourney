@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     const usersWithBreakingStreak = users.filter((user) => {
       const lastSubmission = user.submissions[0]?.submittedAt;
-      return !lastSubmission || dayjs(lastSubmission).isBefore(today);
+      return !lastSubmission || dayjs(lastSubmission).isBefore(today) || user.submissions[0]?.status!=="Accepted" ;
     });
     for (const user of usersWithBreakingStreak) {
       await sendMail({
