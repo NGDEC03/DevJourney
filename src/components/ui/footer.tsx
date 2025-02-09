@@ -29,7 +29,7 @@ export default function Footer() {
        <Link className="text-xs hover:underline underline-offset-4" href="#">
          Privacy
        </Link>
-       <Link className="text-xs hover:underline underline-offset-4" href="/about">
+       <Link className="text-xs hover:underline underline-offset-4" href="#">
          About
        </Link>
        <Link className="text-xs hover:underline underline-offset-4" href="#">

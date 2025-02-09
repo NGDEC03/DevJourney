@@ -38,11 +38,11 @@ export default function Header() {
       {/* Logo */}
       <Link className="flex items-center" href="/">
         <Code2 className="h-6 w-6" />
-        <span className="ml-2 text-lg font-bold">DevJourney</span>
+        <span className="ml-2 text-lg font-bold mr-4">DevJourney</span>
       </Link>
 
       {/* Mobile Menu Button (Hamburger) */}
-      <div className="flex-1 flex justify-center md:hidden">
+      <div className="flex-1 flex justify-center md:hidden mr-2">
         <button onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -76,7 +76,7 @@ export default function Header() {
         ) : (
           <>
             <Button variant="ghost" onClick={() => router.push("/login")}>
-              <LogIn className="h-4 w-4 mr-2" />
+              <LogIn className="h-4 w-4" />
               Login
             </Button>
             <Button variant="ghost" onClick={() => router.push("/register")}>
@@ -97,7 +97,6 @@ export default function Header() {
                 <NavLink href="/learn" onClick={() => setMenuOpen(false)}>Learn</NavLink>
                 <NavLink href="/compete" onClick={() => setMenuOpen(false)}>Compete</NavLink>
                 <NavLink href="/challenge" onClick={() => setMenuOpen(false)}>Challenge</NavLink>
-                <NavLink href="/jobs" onClick={() => setMenuOpen(false)}>Jobs</NavLink>
               </>
             )}
             {isLoggedIn && <NavLink href="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</NavLink>}

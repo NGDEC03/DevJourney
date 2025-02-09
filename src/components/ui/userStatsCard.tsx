@@ -50,8 +50,8 @@ export default function UserStatsCards({ userStats,problems }:UserStat) {
           <BookOpen className="h-4 w-4 text-muted-foreground" aria-label="Learning Progress" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{Math.round((userStats.totalSolved/problems) * 100)}%</div>
-          <Progress value={Math.round((userStats.totalSolved/problems) * 100)} className="mt-2" />
+          <div className="text-2xl font-bold">{Math.round((userStats.totalSolved/problems.length) * 100)}%</div>
+          <Progress value={Math.round((userStats.totalSolved/problems.length) * 100)} className="mt-2" />
         </CardContent>
       </Card>
     </div>
