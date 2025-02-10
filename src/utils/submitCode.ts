@@ -6,21 +6,18 @@ export const submitCode = async (
     testCase: { input: string; output: string; caseId: string; timeLimit: number; memoryLimit: number }
 ) => {
     try {
+
         const response = await axios.post(
-            "https://judge029.p.rapidapi.com/submissions",
+            "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true&fields=*",
             {
                 source_code: code,
                 language_id: languageId,
-                cpu_time_limit:testCase.timeLimit,
-                stdin: testCase.input,
-                
-                expected_output: testCase.output,
+                stdin: testCase.input
             },
             {
-                params: { base64_encoded: "false", wait: "true", fields: "*" },
                 headers: {
                     "x-rapidapi-key": process.env.RAPIDAPI_KEY || "#",
-                    "x-rapidapi-host": "judge029.p.rapidapi.com",
+                    "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
                     "Content-Type": "application/json",
                 },
             }
@@ -28,11 +25,11 @@ export const submitCode = async (
 
         return {
             testCaseId: testCase.caseId,
-            status: response.data.status.description,
-            stderr: response.data.stderr,
-            stdout: response.data.stdout,
-            timeTaken: response.data.time,
-            memoryUsage: response.data.memory,
+            status: response.data.status?.description || "Unknown",
+            stderr: response.data.stderr || null,
+            stdout: response.data.stdout || null,
+            timeTaken: response.data.time || 0,
+            memoryUsage: response.data.memory || 0,
         };
     } catch (err) {
         return { testCaseId: testCase.caseId, status: "Error" };

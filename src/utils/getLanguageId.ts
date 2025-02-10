@@ -1,11 +1,13 @@
 import axios from "axios";
 
 export const getLanguageId = async (language: string): Promise<number | null> => {
+    console.log(process.env.RAPIDAPI_KEY);
+    
     try {
-        const response = await axios.get("https://judge029.p.rapidapi.com/languages", {
+        const response = await axios.get("https://judge0-ce.p.rapidapi.com/languages", {
             headers: {
                 "x-rapidapi-key": process.env.RAPIDAPI_KEY,
-                "x-rapidapi-host": "judge029.p.rapidapi.com",
+                "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
             },
         });
         // console.log(response);

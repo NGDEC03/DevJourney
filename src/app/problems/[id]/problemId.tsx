@@ -253,7 +253,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
       alert("At least write something in the editor !!!!")
       return
     }
-    // console.log('testing');
+    console.log('testing');
     setTesting(true)
     setTested(true)
     try {
@@ -262,7 +262,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         language: language,
         code: code,
         userName: user.userName,
-        test: 5,
+        test: 3,
       })
       // console.log(response)
       const res = response.data.results
@@ -499,7 +499,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
               </div>
             </Card>
           )}
-          <Dialog open={isTestResultDialogOpen} onOpenChange={setIsTestResultDialogOpen}>
+          {/* <Dialog open={isTestResultDialogOpen} onOpenChange={setIsTestResultDialogOpen}>
   <DialogContent className="max-w-2xl">
     <DialogHeader>
       <DialogTitle>Test Case Details</DialogTitle>
@@ -546,7 +546,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
       </DialogDescription>
     </DialogHeader>
   </DialogContent>
-</Dialog>
+</Dialog> */}
 
     </div>
         </div>

@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
        
         // console.log(problem.testCases);
         // return;
-
+// console.log("entered")
         const languageId = await getLanguageId(language);
         // console.log(languageId);
 
@@ -41,7 +41,13 @@ export async function POST(req: NextRequest) {
 
 
         // Elkos Signy Pen
-
+        let cases=[]
+if(test!=-1){
+ cases=problem.testCases.slice(0,5)
+}
+else{
+    cases=problem.testCases
+}
 
 
         const results: any[] = [];
@@ -55,7 +61,7 @@ export async function POST(req: NextRequest) {
         // console.log(t);
         // console.log("entered");
 
-        for (const testCase of problem.testCases.slice(0,5)) {
+        for (const testCase of cases) {
             if (abortDueToTLE) break;
 
             const { input, output, caseId } = testCase;
