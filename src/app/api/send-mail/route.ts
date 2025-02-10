@@ -4,12 +4,12 @@ import { sendMail } from "@/utils/sendMail";
 import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
+const curr=new Date()
 export const runtime = 'nodejs';
 
 
 export async function POST(request: Request) {
-
-
+if(curr.getHours()<20 || curr.getHours()>=21)return NextResponse.json({message:"Not Valid"});
   try {
     const today = dayjs().startOf("day").toDate();
 

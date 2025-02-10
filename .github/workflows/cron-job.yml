@@ -19,4 +19,4 @@ jobs:
     steps:
       - name: Call Next.js API to Reset Streak
         run: |
-          curl -X POST "https://dev-journey-alpha.vercel.app/api/reset-streak"
+          curl -X GET "https://dev-journey-alpha.vercel.app/api/reset-streak"
