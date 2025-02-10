@@ -18,8 +18,10 @@ export default function VerifyEmail() {
   useEffect(() => {
     const verifyEmail=async ()=>{
         const userName=params.get("user")
+        console.log(userName);
+        
         try{
-          const res=await axios.post("/api/verify-email",userName)
+          const res=await axios.post("/api/verify-email",{userName:userName})
           console.log(res.data);
           
           setIsVerified(true)
