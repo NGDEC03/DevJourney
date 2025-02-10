@@ -139,10 +139,10 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
   const [failed, setFailed] = useState(0)
   const [submitted, setSubmitted] = useState(false)
   const handleClick = (result: any, testCase) => {
-    console.log(result+" "+testCase);
+    // console.log(result+" "+testCase);
     
     setSelectedTestResult({ ...result, testCase })
-    console.log("you want this->",selectedTestResult);
+    // console.log("you want this->",selectedTestResult);
     
     setIsTestResultDialogOpen(true)
   }
@@ -230,7 +230,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         userName: user.userName,
         test: -1,
       })
-      console.log(response)
+      // console.log(response)
       const results = response.data.results
       results.forEach((e) => {
         if (e.status === "Accepted") {
@@ -264,7 +264,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         userName: user.userName,
         test: 5,
       })
-      console.log(response)
+      // console.log(response)
       const res = response.data.results
       // const res = results2;
       let temp = []
@@ -338,13 +338,13 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                 {problemData.examples.map((example: any, index: number) => (
                   <div key={index} className="bg-gray-50 p-4 rounded-lg">
                     <p className="font-semibold mb-2">Example {index + 1}:</p>
-                    <p className="whitespace-pre-line">
+                    <p className="whitespace-pre-wrap">
                       <strong>Input:</strong> <br /> {example.input}
                     </p>
-                    <p  className="whitespace-pre-line">
+                    <p className="whitespace-pre-wrap">
                       <strong>Output:</strong> <br /> {example.output}
                     </p>
-                    <p>
+                    <p  className="whitespace-pre-wrap">
                       <strong>Explanation:</strong> {example.explanation}
                     </p>
                   </div>
@@ -473,7 +473,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {console.log(results)}
+                    {/* {console.log(results)} */}
                     {results.map((result, idx) => (
                       <tr key={idx} className="border-t border-gray-200" onClick={()=>handleClick(result,problemData.testCases[idx])}>
                         <td className="px-4 py-2 text-sm font-medium text-gray-900">{idx + 1}</td>
