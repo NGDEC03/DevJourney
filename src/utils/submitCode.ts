@@ -12,7 +12,7 @@ export const submitCode = async (
             {
                 source_code: code,
                 language_id: languageId,
-                stdin: testCase.input
+                stdin: testCase.input,
             },
             {
                 headers: {

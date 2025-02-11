@@ -10,7 +10,7 @@ import { getLanguageId } from "@/utils/getLanguageId";
 export async function POST(req: NextRequest) {
     try {
         const { problemId, language, code, userName, test } = await req.json();
-        // console.log(problemId, language, code, userName)
+        console.log(problemId, language, code, userName)
 
         if (!problemId || !language || !code || !userName) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -30,9 +30,9 @@ export async function POST(req: NextRequest) {
        
         // console.log(problem.testCases);
         // return;
-// console.log("entered")
+console.log("entered")
         const languageId = await getLanguageId(language);
-        // console.log(languageId);
+        console.log(languageId);
 
         if (!languageId) {
             return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         // Elkos Signy Pen
         let cases=[]
 if(test!=-1){
- cases=problem.testCases.slice(0,5)
+ cases=problem.testCases.slice(0,test)
 }
 else{
     cases=problem.testCases
@@ -81,8 +81,12 @@ else{
             if (result.status.description === "Time Limit Exceeded") {
                 abortDueToTLE = true;
             }
+            const isCorrect = result.stdout.trim() === output.trim();
 
-            results.push(result);
+            results.push({
+                ...result,
+                status: isCorrect ? "Accepted" : "Wrong Answer"
+            });
         }
         // console.log(results);
 

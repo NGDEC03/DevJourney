@@ -499,10 +499,11 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
               </div>
             </Card>
           )}
-          {/* <Dialog open={isTestResultDialogOpen} onOpenChange={setIsTestResultDialogOpen}>
+          <Dialog open={isTestResultDialogOpen} onOpenChange={setIsTestResultDialogOpen}>
   <DialogContent className="max-w-2xl">
     <DialogHeader>
       <DialogTitle>Test Case Details</DialogTitle>
+      </DialogHeader>
       <DialogDescription>
         {selectedTestResult ? (
           <div className="space-y-4 mt-4">
@@ -541,12 +542,11 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
             </div>
           </div>
         ) : (
-          <p className="text-gray-500">No test case selected.</p>
+          <div className="text-gray-500">No test case selected.</div>
         )}
       </DialogDescription>
-    </DialogHeader>
   </DialogContent>
-</Dialog> */}
+</Dialog>
 
     </div>
         </div>
