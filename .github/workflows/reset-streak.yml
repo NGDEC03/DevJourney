@@ -1,7 +1,8 @@
-name: Scheduled Email Job
+name: Streak Reset Job
+
 on:
   schedule:
-    - cron: "30 14 * * *"  
+    - cron: "31 18 * * *"  
   workflow_dispatch:  
 
 jobs:
@@ -10,4 +11,4 @@ jobs:
     steps:
       - name: Call Next.js API to Send Email
         run: |
-          curl -X POST "https://dev-journey-alpha.vercel.app/api/send-mail"
+          curl -X POST "https://dev-journey-alpha.vercel.app/api/reset-streak"

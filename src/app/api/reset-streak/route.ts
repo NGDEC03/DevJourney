@@ -2,7 +2,7 @@ import prisma from "@/prismaClient";
 import { NextRequest } from "next/server";
 import { isSameDay, subDays } from "date-fns";
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
     const users = await prisma.user.findMany({
         where: { streak: { gte: 0 } },
         include: {
