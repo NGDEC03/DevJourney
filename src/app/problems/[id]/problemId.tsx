@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -342,8 +342,14 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                       <strong>Input:</strong> <br /> {example.input}
                     </p>
                     <p className="whitespace-pre-wrap">
-                      <strong>Output:</strong> <br /> {example.output}
-                    </p>
+  <strong>Output:</strong> <br />
+  {example.output.split("\n").map((line, index) => (
+    <React.Fragment key={index}>
+      {line}
+      <br />
+    </React.Fragment>
+  ))}
+</p>
                     <p  className="whitespace-pre-wrap">
                       <strong>Explanation:</strong> {example.explanation}
                     </p>
