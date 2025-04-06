@@ -8,8 +8,10 @@ export const submitCode = async (
     testCase: { input: string; output: string; caseId: string; timeLimit: number; memoryLimit: number }
 ) => {
     try {
+        console.log(process.env.sub_url);
+        
         const submissionResponse = await axios.post(
-            `http://${process.env.sub_url}/submissions`,
+            `http://${process.env.sub_url || "api.dev-journey.tech"}/submissions`,
             {
                 source_code: code,
                 language_id: languageId,
@@ -24,7 +26,7 @@ export const submitCode = async (
 
         while (attempts < 10) {
             resultResponse = await axios.get(
-                `http://${process.env.sub_url}/submissions/${token}?base64_encoded=false&fields=*`,
+                `http://${process.env.sub_url || "api.dev-journey.tech"}/submissions/${token}?base64_encoded=false&fields=*`,
             );
 
             const status = resultResponse.data.status?.description || "";
