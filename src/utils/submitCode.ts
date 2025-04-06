@@ -6,9 +6,10 @@ export const submitCode = async (
     testCase: { input: string; output: string; caseId: string; timeLimit: number; memoryLimit: number }
 ) => {
     try {
+console.log(process.env.sub_url);
 
         const response = await axios.post(
-            "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true&fields=*",
+            process.env.sub_url || "",
             {
                 source_code: code,
                 language_id: languageId,
@@ -16,12 +17,11 @@ export const submitCode = async (
             },
             {
                 headers: {
-                    "x-rapidapi-key": process.env.RAPIDAPI_KEY || "#",
-                    "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
-                    "Content-Type": "application/json",
+                    "Content-Type":"application/json",
                 },
             }
         );
+console.log(response);
 
         return {
             testCaseId: testCase.caseId,
