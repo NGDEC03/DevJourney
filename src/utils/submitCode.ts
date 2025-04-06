@@ -9,7 +9,7 @@ export const submitCode = async (
 console.log(process.env.sub_url);
 
         const response = await axios.post(
-           "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true&fields=*",
+           "https://judge0-extra-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=false&fields=*",
             {
                 source_code: code,
                 language_id: languageId,
@@ -18,8 +18,9 @@ console.log(process.env.sub_url);
             {
                 headers: {
                     "Content-Type":"application/json",
-                    "X-Judge0-Token": "judge0",
-                    "X-Judge0-User": "judge0",
+                   "x-rapidapi-host":"judge0-extra-ce.p.rapidapi.com",
+                   "x-rapidapi-key":"2ff3c734fdmshc675eb7785f9d76p13be5djsn486ab81f820d"
+
                 },
             }
         );
