@@ -6,9 +6,8 @@ export const submitCode = async (
     testCase: { input: string; output: string; caseId: string; timeLimit: number; memoryLimit: number }
 ) => {
     try {
-console.log(process.env.sub_url);
-
-        const response = await axios.post(
+      
+        const submissionRes = await axios.post(
             process.env.sub_url || "",
             {
                 source_code: code,
@@ -17,21 +16,46 @@ console.log(process.env.sub_url);
             },
             {
                 headers: {
-                    "Content-Type":"application/json",
+                    "Content-Type": "application/json",
                 },
             }
         );
-console.log(response);
+
+        const token = submissionRes.data.token;
+        if (!token) throw new Error("No token received from submission");
+
+        const resultUrl = `${process.env.sub_url}/${token}`;
+        let resultRes;
+        let attempts = 0;
+
+        while (attempts < 10) {
+            resultRes = await axios.get(resultUrl, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const status = resultRes.data.status?.description || "";
+            if (status !== "In Queue" && status !== "Processing") {
+                break;
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1500)); 
+            attempts++;
+        }
+
+        const data = resultRes?.data;
 
         return {
             testCaseId: testCase.caseId,
-            status: response.data.status?.description || "Unknown",
-            stderr: response.data.stderr || null,
-            stdout: response.data.stdout || null,
-            timeTaken: response.data.time || 0,
-            memoryUsage: response.data.memory || 0,
+            status: data.status?.description || "Unknown",
+            stderr: data.stderr || null,
+            stdout: data.stdout || null,
+            timeTaken: data.time || 0,
+            memoryUsage: data.memory || 0,
         };
     } catch (err) {
+        console.error("Submission error:", err);
         return { testCaseId: testCase.caseId, status: "Error" };
     }
 };
