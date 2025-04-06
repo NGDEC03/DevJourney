@@ -6,152 +6,128 @@ import { submitCode } from "@/utils/submitCode";
 import { calculateStreak } from "@/utils/calculateStreak";
 import { getLanguageId } from "@/utils/getLanguageId";
 
+interface TestCase {
+    input: string;
+    output: string;
+    caseId: string;
+}
+
+// Rate limiting map
+const rateLimit = new Map<string, { count: number; timestamp: number }>();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_REQUESTS = 30; // 30 requests per minute
 
 export async function POST(req: NextRequest) {
     try {
         const { problemId, language, code, userName, test } = await req.json();
-        console.log(problemId, language, code, userName)
 
+        // Input validation
         if (!problemId || !language || !code || !userName) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const problem = await prisma.problem.findUnique({
-            where: { problemId },
-            include: { testCases: true },
-        });
+        // Rate limiting
+        const now = Date.now();
+        const userRateLimit = rateLimit.get(userName);
+        if (userRateLimit) {
+            if (now - userRateLimit.timestamp > RATE_LIMIT_WINDOW) {
+                rateLimit.set(userName, { count: 1, timestamp: now });
+            } else if (userRateLimit.count >= MAX_REQUESTS) {
+                return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+            } else {
+                userRateLimit.count++;
+            }
+        } else {
+            rateLimit.set(userName, { count: 1, timestamp: now });
+        }
 
+        // Fetch problem and language ID in parallel
+        const [problem, languageId] = await Promise.all([
+            prisma.problem.findUnique({
+                where: { problemId },
+                include: { testCases: true },
+            }),
+            getLanguageId(language)
+        ]);
 
         if (!problem) {
             return NextResponse.json({ error: "Problem not found" }, { status: 404 });
         }
-        //    console.log(problem.testCases);
-        //    console.log(test);
-       
-        // console.log(problem.testCases);
-        // return;
-console.log("entered")
-        const languageId = await getLanguageId(language);
-        console.log(languageId);
 
         if (!languageId) {
             return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
         }
 
+        const cases = test !== -1 ? problem.testCases.slice(0, test) : problem.testCases;
 
+        // Run test cases in parallel with a maximum concurrency of 5
+        const batchSize = 5;
+        const results = [];
+        for (let i = 0; i < cases.length; i += batchSize) {
+            const batch = cases.slice(i, i + batchSize);
+            const batchResults = await Promise.all(
+                batch.map(async (testCase: TestCase) => {
+                    const { input, output, caseId } = testCase;
+                    const result = await submitCode(code, languageId, {
+                        input,
+                        output,
+                        timeLimit: problem.timeLimit,
+                        memoryLimit: problem.memoryLimit,
+                        caseId,
+                    });
 
-        // Elkos Signy Pen
-        let cases=[]
-if(test!=-1){
- cases=problem.testCases.slice(0,test)
-}
-else{
-    cases=problem.testCases
-}
-
-
-        const results: any[] = [];
-        let abortDueToTLE = false;
-
-
-
-        // const t:any[]=[]
-        // // t.push(problem.testCases[1])
-        // t.push(problem.testCases[2])
-        // console.log(t);
-        // console.log("entered");
-
-        for (const testCase of cases) {
-            if (abortDueToTLE) break;
-
-            const { input, output, caseId } = testCase;
-            const timeLimit = problem.timeLimit;
-            const memoryLimit = problem.memoryLimit;
-            // console.log(input,output,timeLimit,memoryLimit,code,languageId,caseId)
-            const result = await submitCode(code, languageId, {
-                input,
-                output,
-                timeLimit,
-                memoryLimit,
-                caseId,
-            });
-            console.log(result);
-
-            // Check for TLE
-            if (result.status.description === "Time Limit Exceeded") {
-                abortDueToTLE = true;
-            }
-            const isCorrect = result.stdout.trim() === output.trim();
-
-            results.push({
-                ...result,
-                status: isCorrect ? "Accepted" : "Wrong Answer"
-            });
+                    const isCorrect = result.stdout?.trim() === output.trim();
+                    return {
+                        ...result,
+                        status: isCorrect ? "Accepted" : "Wrong Answer",
+                        testCaseId: caseId
+                    };
+                })
+            );
+            results.push(...batchResults);
         }
-        // console.log(results);
-
 
         const allPassed = results.every((result) => result.status === "Accepted");
         const overallStatus = allPassed ? "Accepted" : "Failed";
-        // console.log(allPassed, overallStatus);
+
         if (test === -1) {
             const { streak } = await calculateStreak(userName, new Date());
 
-            // console.log(streak+" "+problem.problemId+" "+userName);
-
-            await prisma.$transaction(async (prisma) => {
-                await prisma.submission.create({
+            // Batch database operations
+            await prisma.$transaction([
+                prisma.submission.create({
                     data: {
                         status: overallStatus,
                         language: language,
-                        problem: {
-                            connect: {
-                                problemId: problem.problemId
-                            }
-                        },
-                        user: {
-                            connect: {
-                                userName: userName
-                            }
-                        }
+                        problem: { connect: { problemId: problem.problemId } },
+                        user: { connect: { userName } }
                     }
-                });
-
-                await prisma.problem.update({
+                }),
+                prisma.problem.update({
                     where: { problemId: problem.problemId },
                     data: {
                         attemptCount: { increment: 1 },
                         ...(allPassed && {
                             successCount: { increment: 1 },
-                            user: {
-                                connect: {
-                                    userName
-                                }
-                            }
-                        }),
-                    },
-                });
-
-                await prisma.user.update({
+                            user: { connect: { userName } }
+                        })
+                    }
+                }),
+                prisma.user.update({
                     where: { userName },
-                    data: {
-                        ...(allPassed && { streak }),
-                    },
-                });
-
-            });
+                    data: allPassed ? { streak } : {}
+                })
+            ]);
         }
+
         const failedTestCase = results.find((result) => result.status !== "Accepted");
-        const response = {
+        return NextResponse.json({
             status: overallStatus,
             results,
             ...(failedTestCase && {
-                error: `Test case ${failedTestCase.testCaseId} failed: ${failedTestCase.status}`,
-            }),
-        };
-        // console.log(response);
-
-        return NextResponse.json(response);
+                error: `Test case ${failedTestCase.testCaseId} failed: ${failedTestCase.status}`
+            })
+        });
     } catch (error) {
         console.error("Error in submission:", error);
         return NextResponse.json({ error: "An internal error occurred" }, { status: 500 });

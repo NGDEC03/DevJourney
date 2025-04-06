@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Editor from "@monaco-editor/react"
 import axios from "axios"
 import { CheckCircle, Clock, BarChart2, Code2, Code, LoaderCircle, Check, X } from "lucide-react"
-import { SkeletonLoader } from "@/components/ui/skeletonLoader"
 import { languageOptions } from "@/utils/languageOptions"
 import { useSession } from "next-auth/react"
 import {
@@ -140,12 +139,16 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
   const [submitted, setSubmitted] = useState(false)
   const handleClick = (result: any, testCase) => {
     // console.log(result+" "+testCase);
-    
+
     setSelectedTestResult({ ...result, testCase })
     // console.log("you want this->",selectedTestResult);
-    
+
     setIsTestResultDialogOpen(true)
   }
+
+  // First, add a new state to track the current test case being processed
+  const [currentTestIndex, setCurrentTestIndex] = useState(0)
+  const [processingResults, setProcessingResults] = useState<any[]>([])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -153,7 +156,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         // console.log(id)
 
         const data = (await fetchProblem(id.id)) as Problem
-        let examples = []
+        const examples = []
         data.testCases.forEach((test) => {
           if (test.explanation) {
             examples.push(test)
@@ -198,7 +201,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
               </CardContent>
             </Card>
           </div>
-  
+
           <div className="space-y-6">
             <Card className="h-[400px] bg-gray-200 animate-pulse"></Card>
             <div className="flex space-x-4">
@@ -210,18 +213,21 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
       </div>
     )
   }
-  
 
+  // Then update the handleSubmit function to track which test case is being processed
   const handleSubmit = async () => {
     if (code === "") {
       alert("At least write something in the editor !!!!")
       return
     }
-    // return;
+
     setSubmitting(true)
     setPassed(0)
     setFailed(0)
     setSubmitted(false)
+    setProcessingResults([])
+    setCurrentTestIndex(0)
+
     try {
       const response = await axios.post(`/api/submit`, {
         problemId: id.id,
@@ -230,18 +236,38 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         userName: user.userName,
         test: -1,
       })
-      // console.log(response)
-      const results = response.data.results
-      results.forEach((e) => {
-        if (e.status === "Accepted") {
-          setPassed((passed) => passed + 1)
-        } else {
-          setFailed((failed) => failed + 1)
-        }
-      })
 
-      setSubmitting(false)
-      setSubmitted(true)
+      const results = response.data.results
+      let tempPassed = 0
+      let tempFailed = 0
+      const processedResults = []
+
+      // Process results one by one with a delay to show progress
+      const processResults = async () => {
+        for (let i = 0; i < results.length; i++) {
+          setCurrentTestIndex(i + 1)
+          const result = results[i]
+
+          if (result.status === "Accepted") {
+            tempPassed++
+            setPassed(tempPassed)
+          } else {
+            tempFailed++
+            setFailed(tempFailed)
+          }
+
+          processedResults.push(result)
+          setProcessingResults([...processedResults])
+
+          // Small delay to show progress
+          await new Promise((resolve) => setTimeout(resolve, 500))
+        }
+
+        setSubmitting(false)
+        setSubmitted(true)
+      }
+
+      processResults()
     } catch (error) {
       setSubmitting(false)
       console.error(error)
@@ -253,7 +279,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
       alert("At least write something in the editor !!!!")
       return
     }
-    console.log('testing');
+    console.log("testing")
     setTesting(true)
     setTested(true)
     try {
@@ -264,6 +290,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         userName: user.userName,
         test: 3,
       })
+
       // console.log(response)
       const res = response.data.results
       // const res = results2;
@@ -299,12 +326,13 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                   <CardTitle className="text-3xl font-bold">{problemData.problemName}</CardTitle>
                 </div>
                 <Badge
-                  className={`text-sm font-semibold px-3 py-1 rounded-full ${problemData.difficulty === "Easy"
+                  className={`text-sm font-semibold px-3 py-1 rounded-full ${
+                    problemData.difficulty === "Easy"
                       ? "bg-green-100 text-green-800"
                       : problemData.difficulty === "Medium"
                         ? "bg-yellow-100 text-yellow-800"
                         : "bg-red-100 text-red-800"
-                    }`}
+                  }`}
                 >
                   {problemData.difficulty}
                 </Badge>
@@ -313,14 +341,19 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
             <CardContent>
               <div className="list-disc list-inside">
                 {problemData.problemDescription.split("\n").map((line, index) => (
-                  <p className="mb-2" key={index}>{line}</p>
+                  <p className="mb-2" key={index}>
+                    {line}
+                  </p>
                 ))}
               </div>
               <div className="flex items-center space-x-6 mb-6">
                 <div className="flex items-center">
                   <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
                   <span className="text-sm font-medium">
-                    {((problemData.successCount / problemData.attemptCount) * 100).toFixed(1) !== "NaN" ? ((problemData.successCount / problemData.attemptCount) * 100).toFixed(1) : "0"}% Success
+                    {((problemData.successCount / problemData.attemptCount) * 100).toFixed(1) !== "NaN"
+                      ? ((problemData.successCount / problemData.attemptCount) * 100).toFixed(1)
+                      : "0"}
+                    % Success
                   </span>
                 </div>
                 <div className="flex items-center">
@@ -342,15 +375,15 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                       <strong>Input:</strong> <br /> {example.input}
                     </p>
                     <p className="whitespace-pre-wrap">
-  <strong>Output:</strong> <br />
-  {example.output.split("\n").map((line, index) => (
-    <React.Fragment key={index}>
-      {line}
-      <br />
-    </React.Fragment>
-  ))}
-</p>
-                    <p  className="whitespace-pre-wrap">
+                      <strong>Output:</strong> <br />
+                      {example.output.split("\n").map((line, index) => (
+                        <React.Fragment key={index}>
+                          {line}
+                          <br />
+                        </React.Fragment>
+                      ))}
+                    </p>
+                    <p className="whitespace-pre-wrap">
                       <strong>Explanation:</strong> {example.explanation}
                     </p>
                   </div>
@@ -442,21 +475,74 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                       )}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-md">
                     <DialogHeader>
-                      <DialogTitle>Submission Results</DialogTitle>
-                      {submitted ? (
-                        <DialogDescription className="text-zinc-950 p-2">
-                          Test Cases Passed: {passed}
-                          <br />
-                          Test Cases Failed: {failed}
-                        </DialogDescription>
-                      ) : (
-                        <DialogDescription>
-                          <LoaderCircle className="animate-spin" />
-                        </DialogDescription>
-                      )}
+                      <DialogTitle className="text-xl font-bold">Submission Results</DialogTitle>
                     </DialogHeader>
+                    {submitted ? (
+                      <div className="space-y-4 p-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">Test Cases Passed:</span>
+                          <Badge className="bg-green-600">{passed}</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">Test Cases Failed:</span>
+                          <Badge className="bg-red-500">{failed}</Badge>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2 mt-4">
+                          {processingResults.map((result, idx) => (
+                            <Badge
+                              key={idx}
+                              className={`${result.status === "Accepted" ? "bg-green-600" : "bg-red-500"} flex items-center justify-center h-8`}
+                            >
+                              {idx + 1}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4 p-2">
+                        <div className="flex flex-col items-center justify-center space-y-4">
+                          <div className="relative">
+                            <LoaderCircle className="animate-spin h-16 w-16 text-green-600" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-sm font-bold">{currentTestIndex}</span>
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-bold text-lg">Processing Test Case {currentTestIndex}</p>
+                            <p className="text-sm text-gray-500">Hang tight, we're checking your solution...</p>
+                          </div>
+
+                          {/* Progress bar */}
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                              className="bg-green-600 h-2.5 rounded-full transition-all duration-300 ease-in-out"
+                              style={{
+                                width: `${problemData?.testCases?.length ? (currentTestIndex / problemData.testCases.length) * 100 : 0}%`,
+                              }}
+                            ></div>
+                          </div>
+
+                          {/* Show processed results in a grid */}
+                          <div className="grid grid-cols-4 gap-2 w-full mt-2">
+                            {processingResults.map((result, idx) => (
+                              <Badge
+                                key={idx}
+                                className={`${result.status === "Accepted" ? "bg-green-600" : "bg-red-500"} flex items-center justify-center h-8 animate-pulse`}
+                              >
+                                {idx + 1}
+                              </Badge>
+                            ))}
+                            {currentTestIndex > 0 && currentTestIndex <= processingResults.length + 1 && (
+                              <Badge className="bg-yellow-500 flex items-center justify-center h-8 animate-bounce">
+                                {currentTestIndex}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </DialogContent>
                 </Dialog>
               </div>
@@ -481,7 +567,11 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                   <tbody>
                     {/* {console.log(results)} */}
                     {results.map((result, idx) => (
-                      <tr key={idx} className="border-t border-gray-200" onClick={()=>handleClick(result,problemData.testCases[idx])}>
+                      <tr
+                        key={idx}
+                        className="border-t border-gray-200"
+                        onClick={() => handleClick(result, problemData.testCases[idx])}
+                      >
                         <td className="px-4 py-2 text-sm font-medium text-gray-900">{idx + 1}</td>
                         <td className="px-4 py-2">
                           {result.status === "Accepted" ? (
@@ -506,58 +596,56 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
             </Card>
           )}
           <Dialog open={isTestResultDialogOpen} onOpenChange={setIsTestResultDialogOpen}>
-  <DialogContent className="max-w-2xl">
-    <DialogHeader>
-      <DialogTitle>Test Case Details</DialogTitle>
-      </DialogHeader>
-      <DialogDescription>
-        {selectedTestResult ? (
-          <div className="space-y-4 mt-4">
-            <div>
-              <h3 className="font-semibold text-lg">Input</h3>
-              <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
-                {selectedTestResult.testCase.input??""}
-              </pre>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg">Expected Output</h3>
-              <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
-                {selectedTestResult.testCase?.output ??""}
-              </pre>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg">Your Output</h3>
-              <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
-                {selectedTestResult.stdout|| 'No output'}
-              </pre>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="font-semibold">Status</h3>
-                <Badge 
-                  className={`${selectedTestResult.status==="Accepted"?"bg-green-800":"bg-red-400"}`}
-                >
-                  {selectedTestResult.status}
-                </Badge>
-              </div>
-              <div>
-                <h3 className="font-semibold">Performance</h3>
-                <p>Time: {selectedTestResult.timeTaken ?? 'N/A'} ms</p>
-                <p>Memory: {selectedTestResult.memoryUsage ?? 'N/A'} KB</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="text-gray-500">No test case selected.</div>
-        )}
-      </DialogDescription>
-  </DialogContent>
-</Dialog>
-
-    </div>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Test Case Details</DialogTitle>
+              </DialogHeader>
+              <DialogDescription>
+                {selectedTestResult ? (
+                  <div className="space-y-4 mt-4">
+                    <div>
+                      <h3 className="font-semibold text-lg">Input</h3>
+                      <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
+                        {selectedTestResult.testCase.input ?? ""}
+                      </pre>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">Expected Output</h3>
+                      <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
+                        {selectedTestResult.testCase?.output ?? ""}
+                      </pre>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">Your Output</h3>
+                      <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
+                        {selectedTestResult.stdout || "No output"}
+                      </pre>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="font-semibold">Status</h3>
+                        <Badge
+                          className={`${selectedTestResult.status === "Accepted" ? "bg-green-800" : "bg-red-400"}`}
+                        >
+                          {selectedTestResult.status}
+                        </Badge>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Performance</h3>
+                        <p>Time: {selectedTestResult.timeTaken ?? "N/A"} ms</p>
+                        <p>Memory: {selectedTestResult.memoryUsage ?? "N/A"} KB</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-gray-500">No test case selected.</div>
+                )}
+              </DialogDescription>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
-    
+    </div>
   )
 }
 
