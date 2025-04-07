@@ -78,7 +78,6 @@ export async function POST(req: NextRequest) {
                             memoryLimit: problem.memoryLimit,
                             caseId,
                         });
-console.log(result.stderr);
 
                         if (result.stderr) {
                             return {

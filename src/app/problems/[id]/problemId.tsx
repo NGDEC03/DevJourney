@@ -89,10 +89,10 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
   const [errorMessage, setErrorMessage] = useState("")
 
   const handleClick = (result: any, testCase) => {
-    console.log(result);
     
-    if (result.status === "Error") {
-      setErrorMessage(result.stderr || result.error || "Unknown error occurred")
+    
+    if (result.status.includes("Error") || result.compile_output) {
+      setErrorMessage(result.stderr || result.compile_output||  result.error || "Unknown error occurred")
       setIsErrorDialogOpen(true)
     } else {
 
@@ -117,7 +117,6 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         })
         data.examples = examples.slice(0, 3)
         setProblemData(data)
-        // console.log(data);
       } catch (error) {
         console.error("Error fetching problem data", error)
       } finally {
@@ -234,7 +233,6 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
       alert("At least write something in the editor !!!!")
       return
     }
-    console.log("testing")
     setTesting(true)
     setTested(true)
     try {
@@ -529,7 +527,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                               <Check className="w-4 h-4 mr-1" />
                               Accepted
                             </span>
-                          ) : result.status === "Error" ? (
+                          ) : result.status === "Error" || result.compile_output ? (
                             <span 
                               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200"
                               onClick={() => handleClick(result, problemData.testCases[idx])}
@@ -580,21 +578,21 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                         {selectedTestResult.stdout || "No output"}
                       </pre>
                     </div>
-                    {selectedTestResult.stderr && (
+                    {/* {selectedTestResult.stderr && (
                       <div>
                         <h3 className="font-semibold text-lg text-red-600">Error Message</h3>
                         <pre className="bg-red-50 p-3 rounded-md overflow-x-auto text-red-600">
                           {selectedTestResult.stderr}
                         </pre>
                       </div>
-                    )}
+                    )} */}
                     <div>
                       <h3 className="font-semibold">Status</h3>
                       <Badge
                         className={`${
                           selectedTestResult.status === "Accepted" 
                             ? "bg-green-800" 
-                            : selectedTestResult.status === "Error"
+                            : selectedTestResult.status.includes("Error")
                             ? "bg-red-600"
                             : "bg-red-400"
                         }`}
@@ -642,4 +640,3 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
     </div>
   )
 }
-

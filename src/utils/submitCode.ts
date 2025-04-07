@@ -82,6 +82,7 @@ export const submitCode = async (
             stdout: data.stdout || null,
             timeTaken: data.time || 0,
             memoryUsage: data.memory || 0,
+            compile_output:data.compile_output
         };
 
         submissionCache.set(cacheKey, result);
