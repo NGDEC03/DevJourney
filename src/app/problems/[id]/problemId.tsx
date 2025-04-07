@@ -21,57 +21,6 @@ import {
 } from "@/components/ui/dialog"
 import { InputOutputFormat } from "@/components/ui/InputOutputFormat"
 
-// const results2 = [
-//     {
-//         "testCaseId": "67890a802df36f260898906b",
-//         "status": "Accepted",
-//         "stderr": null,
-//         "stdout": "2\n",
-//         "timeTaken": "0.034",
-//         "memoryUsage": 6888
-//     },
-//     {
-//         "testCaseId": "67890eed2df36f2608989071",
-//         "status": "Accepted",
-//         "stderr": null,
-//         "stdout": "2\n",
-//         "timeTaken": "0.035",
-//         "memoryUsage": 6712
-//     },
-//     {
-//         "testCaseId": "67890f352df36f2608989073",
-//         "status": "Accepted",
-//         "stderr": null,
-//         "stdout": "2\n",
-//         "timeTaken": "0.037",
-//         "memoryUsage": 6756
-//     },
-//     {
-//         "testCaseId": "67890f652df36f2608989074",
-//         "status": "Accepted",
-//         "stderr": null,
-//         "stdout": "2\n",
-//         "timeTaken": "0.035",
-//         "memoryUsage": 6836
-//     },
-//     {
-//         "testCaseId": "67890f882df36f2608989075",
-//         "status": "Failed",
-//         "stderr": null,
-//         "stdout": "2\n",
-//         "timeTaken": "0.037",
-//         "memoryUsage": 6756
-//     },
-//     {
-//         "testCaseId": "678a5dda4d11c2abca7451af",
-//         "status": "Accepted",
-//         "stderr": null,
-//         "stdout": "2\n",
-//         "timeTaken": "0.035",
-//         "memoryUsage": 6912
-//     }
-// ];
-
 interface Problem {
   problemId: string
   problemName: string
@@ -119,7 +68,6 @@ async function fetchProblem(id: string) {
 
 export default function ProblemPage({ params }: { params: { id: problemID } }) {
   const id = params.id
-  // console.log(id);
 
   const { data: session } = useSession()
   const [selectedTestResult, setSelectedTestResult] = useState<any>(null)
@@ -153,15 +101,12 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
       setIsTestResultDialogOpen(true)
     }
   }
-
-  // First, add a new state to track the current test case being processed
   const [currentTestIndex, setCurrentTestIndex] = useState(0)
   const [processingResults, setProcessingResults] = useState<any[]>([])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // console.log(id)
 
         const data = (await fetchProblem(id.id)) as Problem
         const examples = []
@@ -170,7 +115,6 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
             examples.push(test)
           }
         })
-        // data.examples = data.testCases.slice(0, 3)
         data.examples = examples.slice(0, 3)
         setProblemData(data)
         // console.log(data);
@@ -222,7 +166,6 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
     )
   }
 
-  // Then update the handleSubmit function to track which test case is being processed
   const handleSubmit = async () => {
     if (code === "") {
       alert("At least write something in the editor !!!!")
@@ -242,21 +185,20 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         language: language,
         code: code,
         userName: user.userName,
-        test: 5,
+        test: -1,
       })
 
       const results = response.data.results
       const warning = response.data.warning
       
       if (warning) {
-        alert(warning) // Show warning if test cases were limited
+        alert(warning) 
       }
 
       let tempPassed = 0
       let tempFailed = 0
       const processedResults = []
 
-      // Process results one by one with a delay to show progress
       const processResults = async () => {
         for (let i = 0; i < results.length; i++) {
           setCurrentTestIndex(i + 1)
@@ -273,7 +215,6 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
           processedResults.push(result)
           setProcessingResults([...processedResults])
 
-          // Small delay to show progress
           await new Promise((resolve) => setTimeout(resolve, 500))
         }
 
@@ -305,9 +246,7 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         test: 3,
       })
 
-      // console.log(response)
       const res = response.data.results
-      // const res = results2;
       let temp = []
       let index = 0
       const intervalId = setInterval(() => {
@@ -528,7 +467,6 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                             <p className="text-sm text-gray-500">Hang tight, we're checking your solution...</p>
                           </div>
 
-                          {/* Progress bar */}
                           <div className="w-full bg-gray-200 rounded-full h-2.5">
                             <div
                               className="bg-green-600 h-2.5 rounded-full transition-all duration-300 ease-in-out"
@@ -538,7 +476,6 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                             ></div>
                           </div>
 
-                          {/* Show processed results in a grid */}
                           <div className="grid grid-cols-4 gap-2 w-full mt-2">
                             {processingResults.map((result, idx) => (
                               <Badge
@@ -579,7 +516,6 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* {console.log(results)} */}
                     {results.map((result, idx) => (
                       <tr
                         key={idx}

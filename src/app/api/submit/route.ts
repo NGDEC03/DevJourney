@@ -116,7 +116,6 @@ console.log(result.stderr);
             try {
                 const { streak } = await calculateStreak(userName, new Date());
 
-                // Batch database operations
                 await prisma.$transaction([
                     prisma.submission.create({
                         data: {

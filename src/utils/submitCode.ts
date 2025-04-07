@@ -2,14 +2,11 @@ import axios from "axios";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Cache for submission results to avoid redundant API calls
 const submissionCache = new Map<string, any>();
 
-// Get the base URL based on environment
 const getBaseUrl = () => {
     const subUrl = process.env.NEXT_PUBLIC_SUB_URL || process.env.sub_url || "api.dev-journey.tech";
-    const protocol = process.env.NODE_ENV === 'production' ? 'http' : 'http';
-   console.log(protocol)
+    const protocol = 'http';
     return `${protocol}://${subUrl}`;
 };
 
@@ -22,7 +19,6 @@ export const submitCode = async (
         const baseUrl = getBaseUrl();
         const submissionUrl = `${baseUrl}/submissions`;
         
-        // Check cache first
         const cacheKey = `${code}-${languageId}-${testCase.input}`;
         if (submissionCache.has(cacheKey)) {
             return submissionCache.get(cacheKey);
@@ -47,7 +43,7 @@ export const submitCode = async (
 
         let resultResponse;
         let attempts = 0;
-        let delay = 500; // Start with 500ms delay
+        let delay = 500; 
 
         while (attempts < 8) {
             try {
@@ -67,7 +63,7 @@ export const submitCode = async (
                 }
 
                 await sleep(delay);
-                delay *= 1.5; // Exponential backoff
+                delay *= 1.5; 
                 attempts++;
             } catch (error) {
                 console.error('Error polling submission result:', error);
@@ -88,7 +84,6 @@ export const submitCode = async (
             memoryUsage: data.memory || 0,
         };
 
-        // Cache the result
         submissionCache.set(cacheKey, result);
 
         return result;
