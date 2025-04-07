@@ -137,13 +137,21 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
   const [passed, setPassed] = useState(0)
   const [failed, setFailed] = useState(0)
   const [submitted, setSubmitted] = useState(false)
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
+
   const handleClick = (result: any, testCase) => {
-    // console.log(result+" "+testCase);
+    console.log(result);
+    
+    if (result.status === "Error") {
+      setErrorMessage(result.stderr || result.error || "Unknown error occurred")
+      setIsErrorDialogOpen(true)
+    } else {
 
-    setSelectedTestResult({ ...result, testCase })
-    // console.log("you want this->",selectedTestResult);
-
-    setIsTestResultDialogOpen(true)
+      
+      setSelectedTestResult({ ...result, testCase })
+      setIsTestResultDialogOpen(true)
+    }
   }
 
   // First, add a new state to track the current test case being processed
@@ -234,10 +242,16 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
         language: language,
         code: code,
         userName: user.userName,
-        test: -1,
+        test: 5,
       })
 
       const results = response.data.results
+      const warning = response.data.warning
+      
+      if (warning) {
+        alert(warning) // Show warning if test cases were limited
+      }
+
       let tempPassed = 0
       let tempFailed = 0
       const processedResults = []
@@ -579,6 +593,14 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                               <Check className="w-4 h-4 mr-1" />
                               Accepted
                             </span>
+                          ) : result.status === "Error" ? (
+                            <span 
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-pointer hover:bg-red-200"
+                              onClick={() => handleClick(result, problemData.testCases[idx])}
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Error
+                            </span>
                           ) : (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                               <X className="w-4 h-4 mr-1" />
@@ -601,7 +623,8 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                 <DialogTitle>Test Case Details</DialogTitle>
               </DialogHeader>
               <DialogDescription>
-                {selectedTestResult ? (
+                {
+                selectedTestResult ? (
                   <div className="space-y-4 mt-4">
                     <div>
                       <h3 className="font-semibold text-lg">Input</h3>
@@ -621,25 +644,60 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
                         {selectedTestResult.stdout || "No output"}
                       </pre>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    {selectedTestResult.stderr && (
                       <div>
-                        <h3 className="font-semibold">Status</h3>
-                        <Badge
-                          className={`${selectedTestResult.status === "Accepted" ? "bg-green-800" : "bg-red-400"}`}
-                        >
-                          {selectedTestResult.status}
-                        </Badge>
+                        <h3 className="font-semibold text-lg text-red-600">Error Message</h3>
+                        <pre className="bg-red-50 p-3 rounded-md overflow-x-auto text-red-600">
+                          {selectedTestResult.stderr}
+                        </pre>
                       </div>
-                      <div>
-                        <h3 className="font-semibold">Performance</h3>
-                        <p>Time: {selectedTestResult.timeTaken ?? "N/A"} ms</p>
-                        <p>Memory: {selectedTestResult.memoryUsage ?? "N/A"} KB</p>
-                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-semibold">Status</h3>
+                      <Badge
+                        className={`${
+                          selectedTestResult.status === "Accepted" 
+                            ? "bg-green-800" 
+                            : selectedTestResult.status === "Error"
+                            ? "bg-red-600"
+                            : "bg-red-400"
+                        }`}
+                      >
+                        {selectedTestResult.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Performance</h3>
+                      <p>Time: {selectedTestResult.timeTaken ?? "N/A"} ms</p>
+                      <p>Memory: {selectedTestResult.memoryUsage ?? "N/A"} KB</p>
                     </div>
                   </div>
                 ) : (
                   <div className="text-gray-500">No test case selected.</div>
                 )}
+              </DialogDescription>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-red-600">Error Details</DialogTitle>
+              </DialogHeader>
+              <DialogDescription>
+                <div className="space-y-4 mt-4">
+                  <div>
+                    <h3 className="font-semibold text-lg">Error Message</h3>
+                    <pre className="bg-red-50 p-3 rounded-md overflow-x-auto text-red-600">
+                      {errorMessage}
+                    </pre>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Input</h3>
+                    <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
+                      {selectedTestResult?.testCase?.input ?? ""}
+                    </pre>
+                  </div>
+                </div>
               </DialogDescription>
             </DialogContent>
           </Dialog>
