@@ -8,7 +8,7 @@ const submissionCache = new Map<string, any>();
 // Get the base URL based on environment
 const getBaseUrl = () => {
     const subUrl = process.env.NEXT_PUBLIC_SUB_URL || process.env.sub_url || "api.dev-journey.tech";
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+    const protocol = process.env.NODE_ENV === 'production' ? 'http' : 'http';
    console.log(protocol)
     return `${protocol}://${subUrl}`;
 };
