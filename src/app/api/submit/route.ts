@@ -3,6 +3,7 @@ import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 import { submitCode } from "@/utils/submitCode";
 import { getLanguageId } from "@/utils/getLanguageId";
+import { calculateStreak } from "@/utils/calculateStreak";
 
 interface TestCase {
     input: string;
@@ -42,7 +43,6 @@ export async function POST(req: NextRequest) {
 
         let cases = [];
         if (test === -1) {
-            // For full submission, get the next batch of test cases
             const startIndex = batchIndex * MAX_TEST_CASES_PER_BATCH;
             cases = problem.testCases.slice(startIndex, startIndex + MAX_TEST_CASES_PER_BATCH);
         } else if (customInput) {
@@ -112,9 +112,37 @@ export async function POST(req: NextRequest) {
             results.push(...batchResults);
         }
 
-        // For full submissions, check if there are more test cases to process
         const hasMoreTestCases = test === -1 && 
             (batchIndex + 1) * MAX_TEST_CASES_PER_BATCH < problem.testCases.length;
+
+        if (!hasMoreTestCases) {
+            const allPassed = results.every((result) => result.status === "Accepted");
+            
+           
+            
+
+            await prisma.$transaction([
+                prisma.submission.create({
+                    data: {
+                        status: allPassed ? "Accepted" : "Failed",
+                        language: language,
+                        problem: { connect: { problemId: problem.problemId } },
+                        user: { connect: { userName } }
+                    }
+                }),
+                prisma.problem.update({
+                    where: { problemId },
+                    data: {
+                        attemptCount: { increment: 1 },
+                        ...(allPassed && {
+                            successCount: { increment: 1 },
+                            user: { connect: { userName } }
+                        })
+                    }
+                }),
+            
+            ]);
+        }
 
         return NextResponse.json({
             status: "Success",
