@@ -167,66 +167,87 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
 
   const handleSubmit = async () => {
     if (code === "") {
-      alert("At least write something in the editor !!!!")
-      return
+      setErrorMessage("At least write something in the editor !!!!");
+      setIsErrorDialogOpen(true);
+      return;
     }
 
-    setSubmitting(true)
-    setPassed(0)
-    setFailed(0)
-    setSubmitted(false)
-    setProcessingResults([])
-    setCurrentTestIndex(0)
+    setSubmitting(true);
+    setPassed(0);
+    setFailed(0);
+    setSubmitted(false);
+    setProcessingResults([]);
+    setCurrentTestIndex(0);
 
     try {
-      const response = await axios.post(`/api/submit`, {
-        problemId: id.id,
-        language: language,
-        code: code,
-        userName: user.userName,
-        test: -1,
-      })
+      let batchIndex = 0;
+      let allResults: any[] = [];
+      let hasMoreTestCases = true;
 
-      const results = response.data.results
-      const warning = response.data.warning
-      
-      if (warning) {
-        alert(warning) 
-      }
+      while (hasMoreTestCases) {
+        const response = await axios.post(`/api/submit`, {
+          problemId: id.id,
+          language: language,
+          code: code,
+          userName: user.userName,
+          test: -1,
+          batchIndex
+        }, {
+          timeout: 15000
+        });
 
-      let tempPassed = 0
-      let tempFailed = 0
-      const processedResults = []
-
-      const processResults = async () => {
-        for (let i = 0; i < results.length; i++) {
-          setCurrentTestIndex(i + 1)
-          const result = results[i]
-
-          if (result.status === "Accepted") {
-            tempPassed++
-            setPassed(tempPassed)
-          } else {
-            tempFailed++
-            setFailed(tempFailed)
-          }
-
-          processedResults.push(result)
-          setProcessingResults([...processedResults])
-
-          await new Promise((resolve) => setTimeout(resolve, 500))
+        const { results, warning, status, hasMoreTestCases: moreTestCases, nextBatchIndex } = response.data;
+        
+        if (warning) {
+          setErrorMessage(warning);
+          setIsErrorDialogOpen(true);
         }
 
-        setSubmitting(false)
-        setSubmitted(true)
+        if (status === "Timeout") {
+          setErrorMessage("Execution timed out. Some test cases were not processed.");
+          setIsErrorDialogOpen(true);
+          break;
+        }
+
+        const newResults = [...allResults, ...results];
+        allResults = newResults;
+        hasMoreTestCases = moreTestCases;
+        batchIndex = nextBatchIndex;
+
+        // Update UI state once per batch
+        const tempPassed = newResults.filter(result => result.status === "Accepted").length;
+        const tempFailed = newResults.filter(result => result.status !== "Accepted").length;
+        
+        setPassed(tempPassed);
+        setFailed(tempFailed);
+        setProcessingResults(newResults);
+        setCurrentTestIndex(newResults.length);
       }
 
-      processResults()
-    } catch (error) {
-      setSubmitting(false)
-      console.error(error)
+      setSubmitting(false);
+      setSubmitted(true);
+
+      // Update final status
+      const allPassed = allResults.every(result => result.status === "Accepted");
+      if (allPassed) {
+        setErrorMessage("Congratulations! All test cases passed!");
+        setIsErrorDialogOpen(true);
+      } else {
+        setErrorMessage("Some test cases failed. Please check the results.");
+        setIsErrorDialogOpen(true);
+      }
+    } catch (error: any) {
+      setSubmitting(false);
+      console.error(error);
+      if (error.code === 'ECONNABORTED') {
+        setErrorMessage("Request timed out. Please try again.");
+        setIsErrorDialogOpen(true);
+      } else {
+        setErrorMessage("An error occurred while submitting your solution. Please try again.");
+        setIsErrorDialogOpen(true);
+      }
     }
-  }
+  };
 
   const handleTest = async () => {
     if (code === "") {
@@ -615,22 +636,26 @@ export default function ProblemPage({ params }: { params: { id: problemID } }) {
           <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle className="text-xl font-bold text-red-600">Error Details</DialogTitle>
+                <DialogTitle className={`text-xl font-bold text-gray-500`}>{errorMessage.includes("Congratulations")?"Summary":"Error Details"}</DialogTitle>
               </DialogHeader>
               <DialogDescription>
                 <div className="space-y-4 mt-4">
                   <div>
-                    <h3 className="font-semibold text-lg">Error Message</h3>
-                    <pre className="bg-red-50 p-3 rounded-md overflow-x-auto text-red-600">
+                    <h3 className="font-semibold text-lg"></h3>
+                    <pre className={`${errorMessage.includes("Congratulations")?"bg-green-100":"bg-red-100"} p-3 rounded-md overflow-x-auto `}>
                       {errorMessage}
                     </pre>
                   </div>
-                  <div>
+                  {
+                    !errorMessage.includes("Congratulations") && !errorMessage.includes("Some")?(
+                      <div>
                     <h3 className="font-semibold text-lg">Input</h3>
                     <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto">
                       {selectedTestResult?.testCase?.input ?? ""}
                     </pre>
                   </div>
+                    ):(<></>)
+                  }
                 </div>
               </DialogDescription>
             </DialogContent>
