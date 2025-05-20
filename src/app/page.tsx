@@ -62,23 +62,23 @@ export default function LandingPage() {
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
               <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
                 <Code2 className="h-10 w-10 mb-2" />
-                <h2 className="text-xl font-bold">1000+ Coding Challenges</h2>
-                <p className="text-center text-gray-700 ">
-                  From easy to hard, covering all major algorithms and data structures.
+                <h2 className="text-xl font-bold">Code Editor</h2>
+                <p className="text-center text-gray-700">
+                  Write and test your code in C++, Python, or Java with instant feedback.
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
                 <GraduationCap className="h-10 w-10 mb-2" />
-                <h2 className="text-xl font-bold">Interactive Learning Paths</h2>
+                <h2 className="text-xl font-bold">Problem Categories</h2>
                 <p className="text-center text-gray-700">
-                  Structured courses to guide you from basics to advanced topics.
+                  Solve problems across different difficulty levels and topics.
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
                 <Users className="h-10 w-10 mb-2" />
-                <h2 className="text-xl font-bold">Vibrant Community</h2>
+                <h2 className="text-xl font-bold">Track Progress</h2>
                 <p className="text-center text-gray-700">
-                  Connect with fellow coders, share solutions, and learn together.
+                  Monitor your solved problems, success rate, and learning journey.
                 </p>
               </div>
             </div>

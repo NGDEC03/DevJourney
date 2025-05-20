@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Problem } from "@prisma/client";
 import { motion } from "framer-motion";
-import { BookOpen, Target, TrendingUp } from "lucide-react";
+import { BookOpen, Loader2, Target, TrendingUp } from "lucide-react";
+import { useSession } from "next-auth/react";
+import LoginPage from "@/app/(auth)/login/Login";
+import { useRouter } from "next/navigation";
 
 interface UserStats {
   totalSolved: number;
@@ -23,11 +26,15 @@ interface POTDResponse {
 }
 
 export function ProblemOfTheDay() {
+  const router=useRouter()
+  const {data:session}=useSession()
   const [data, setData] = useState<POTDResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
   useEffect(() => {
+
     const fetchPOTD = async () => {
       try {
         const response = await fetch("/api/potd");
@@ -54,7 +61,23 @@ export function ProblemOfTheDay() {
       </div>
     );
   }
-
+  if (!session || !session.user) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen text-center space-y-4 bg-gray-100 px-4">
+        <div className="text-4xl animate-bounce">🔒</div>
+        <h1 className="text-xl font-semibold text-gray-800">
+          Hold up! You need to <span className="text-blue-600">log in</span> to access this page.
+        </h1>
+        <p className="text-gray-600">Your session is missing or has expired.</p>
+        <button
+          onClick={() => router.push("/login")}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md transition-all duration-200 shadow-md"
+        >
+          Log In Now
+        </button>
+      </div>
+    );
+  }
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -125,7 +148,6 @@ export function ProblemOfTheDay() {
         ))}
       </div>
 
-      {/* User Progress */}
       <div className="mb-6 p-4 bg-gray-50 rounded-lg">
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp className="w-5 h-5 text-gray-600" />
