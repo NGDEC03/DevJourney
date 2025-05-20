@@ -35,20 +35,18 @@ export default function Header() {
 
   return (
     <header className="px-4 lg:px-6 h-14 flex items-center justify-between bg-white shadow-md">
-      {/* Logo */}
+     
       <Link className="flex items-center" href="/">
         <Code2 className="h-6 w-6" />
         <span className="ml-2 text-lg font-bold mr-4">DevJourney</span>
       </Link>
 
-      {/* Mobile Menu Button (Hamburger) */}
       <div className="flex-1 flex justify-center md:hidden mr-2">
         <button onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
-      {/* Desktop Navigation */}
       <nav className="hidden md:flex gap-6">
         {!isAdminDashboard && (
           <>
@@ -57,6 +55,7 @@ export default function Header() {
             <NavLink href="/compete">Compete</NavLink>
             <NavLink href="/challenge">Challenge</NavLink>
             <NavLink href="/jobs">Jobs</NavLink>
+            <NavLink href="/ppotd">P-POTD</NavLink>
           </>
         )}
       </nav>
