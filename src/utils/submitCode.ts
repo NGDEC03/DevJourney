@@ -2,7 +2,7 @@ import axios from "axios";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const submissionCache = new Map<string, any>();
+const submissionCache = new Map<string, any>()
 
 const getBaseUrl = () => {
     const subUrl = process.env.NEXT_PUBLIC_SUB_URL || process.env.sub_url || "api.dev-journey.tech";
@@ -18,18 +18,13 @@ export const submitCode = async (
     try {
         const baseUrl = getBaseUrl();
         const submissionUrl = `${baseUrl}/submissions`;
-        
-        const cacheKey = `${code}-${languageId}-${testCase.input}`;
-        if (submissionCache.has(cacheKey)) {
-            return submissionCache.get(cacheKey);
-        }
-
+                            
         const submissionResponse = await axios.post(
             submissionUrl,
             {
                 source_code: code,
                 language_id: languageId,
-                stdin: testCase.input
+                stdin: testCase.input,
             },
             {
                 headers: {
@@ -38,6 +33,7 @@ export const submitCode = async (
                 }
             }
         );
+// console.log(submissi);
 
         const { token } = submissionResponse.data;
 
@@ -75,6 +71,8 @@ export const submitCode = async (
         }
 
         const data = resultResponse?.data;
+        console.log(data);
+        
         const result = {
             testCaseId: testCase.caseId,
             status: data.status?.description || "Unknown",
@@ -84,16 +82,22 @@ export const submitCode = async (
             memoryUsage: data.memory || 0,
             compile_output:data.compile_output
         };
-
+        const cacheKey = `${languageId}:${testCase.caseId}:${Buffer.from(code).toString('base64')}`;
         submissionCache.set(cacheKey, result);
 
         return result;
     } catch (error) {
-        console.error("Code submission error:", error);
+        console.error("Code submission error:", {
+            message: (error as any).message,
+            response: (error as any).response?.data,
+            status: (error as any).response?.status,
+            url: (error as any).config?.url
+        });
         return { 
             testCaseId: testCase.caseId, 
             status: "Error",
-            error: error.message || "An error occurred during submission"
+            error: (error as any).message || "An error occurred during submission",
+            details: (error as any).response?.data
         };
     }
 };

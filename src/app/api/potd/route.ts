@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getServerSession } from "next-auth/next";
+import authOptions from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/prismaClient";
 
 // Calculate similarity score between user profile and problem
@@ -49,6 +49,8 @@ function calculateSimilarityScore(
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
+    console.log(session.user);
+    
     if (!session?.user?.Email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

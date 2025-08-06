@@ -81,6 +81,7 @@ pages:{
         },
     },
 };
+export default authOptions;
 // @ts-expect-error - nessasary for next-auth
 const handler = NextAuth(authOptions);
 
